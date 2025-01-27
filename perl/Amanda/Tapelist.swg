@@ -52,7 +52,7 @@ use Amanda::Debug qw(:logging);
 use Amanda::Config qw( config_dir_relative );
 use File::Copy;
 use Fcntl qw(:flock); # import LOCK_* constants
-use Amanda::Message qw( :severity );
+use Amanda::Message;
 
 ## package functions
 

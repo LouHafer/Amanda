@@ -24,6 +24,7 @@ AM_CPPFLAGS =  \
             -I$(top_srcdir)/perl/amglue \
             -I$(top_srcdir)/gnulib \
             -I$(top_srcdir)/ndmp-src \
+            -I$(top_builddir)/ndmp-src \
             $(PERL_INC)
 
 if WANT_SERVER

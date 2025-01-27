@@ -32,7 +32,6 @@
     <arg choice='opt'>-b</arg>
     <arg choice='opt'>-f</arg>
     <arg choice='opt'>--exact-match</arg>
-    <arg choice='opt'>-s</arg>
     <arg choice='opt'>-D <replaceable>datestamp</replaceable></arg>
     &configoverride.synopsis;
     <arg choice='plain'><replaceable>config</replaceable></arg>
@@ -90,14 +89,6 @@ This is useful if
 <command>amflush</command>
 is run as part of another script that, for example, advances the tape
 after the flush is completed.</para>
-  </listitem>
-  </varlistentry>
-  <varlistentry>
-  <term><option>-s</option></term>
-  <listitem>
-<para>Write log to stdout/stderr instead of the amflush log file. Requires the
-<option>-f</option>
-option.</para>
   </listitem>
   </varlistentry>
   <varlistentry>

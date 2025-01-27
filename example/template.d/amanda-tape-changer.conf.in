@@ -39,6 +39,7 @@ define dumptype global {
 define application-tool app_amgtar {
     comment "amgtar"
     plugin  "amgtar"
+    property "XATTRS" "YES"
     #property "GNUTAR-PATH" "/path/to/gtar"
     #property "GNUTAR-LISTDIR" "/path/to/gnutar_list_dir"
 }

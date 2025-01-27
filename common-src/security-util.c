@@ -2425,7 +2425,7 @@ sec_tcp_conn_read_callback(
     struct sec_handle *	rh;
     pkt_t		pkt;
     ssize_t		rval;
-    GSList		*reader_callbacks;
+    GSList		*reader_callbacks,*reader_callbacks_next;
 
     assert(cookie != NULL);
 
@@ -2444,9 +2444,15 @@ sec_tcp_conn_read_callback(
     if (rval < 0 || rc->handle == H_EOF) {
 	rc->pktlen = rval;
 	rc->handle = H_EOF;
+/*
+  Grab the pointer to the next reader callback before we invoke it, because
+  it's possible a reader callback will remove itself from the callbacks list
+  while executing.
+*/
 	for (reader_callbacks = rc->reader_callbacks; reader_callbacks != NULL;
-	     reader_callbacks = reader_callbacks->next) {
+	     reader_callbacks = reader_callbacks_next) {
 	    reader_callback *r_callback = (reader_callback *)reader_callbacks->data;
+	    reader_callbacks_next = reader_callbacks->next;
 	    r_callback->callback(r_callback->s);
 	}
 	/* Must close all events */

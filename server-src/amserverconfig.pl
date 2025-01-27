@@ -656,7 +656,6 @@ if ( defined $template ) {
 &create_customconf;
 }
 
-&check_xinetd;
 &build_amanda_ssh_key;
 
 if ( $vtape_err ) {

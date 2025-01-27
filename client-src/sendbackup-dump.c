@@ -295,7 +295,7 @@ start_backup(
 	program->backup_name  = XFSDUMP;
 	program->restore_name = XFSRESTORE;
 
-	indexcmd = g_strjoin(NULL, XFSRESTORE, " -t", " -v", " silent", " -",
+	indexcmd = g_strjoin(NULL, XFSRESTORE, " -a /var/lib/amanda -t", " -v", " silent", " -",
 	    " 2>/dev/null", " | sed", " -e", " \'s/^/\\//\'", NULL);
 
 	info_tapeheader(dle);

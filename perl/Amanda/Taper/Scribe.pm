@@ -1084,7 +1084,7 @@ sub _xmsg_no_space {
 	if ($chg->{'global_space'}) {
 	    $chg->inventory(inventory_cb => $steps->{'got_inventory'});
 	} else {
-	    return $finished_cb();
+	    return $finished_cb->();
 	}
     };
 

@@ -215,10 +215,10 @@ holdingdisk hd1 {
 # Note that, although the keyword below is infofile, it is only so for
 # historic reasons, since now it is supposed to be a directory (unless
 # you have selected some database format other than the `text' default)
-infofile "@CONFIG_DIR@/@DEFAULT_CONFIG@/curinfo"	# database DIRECTORY
-logdir   "@CONFIG_DIR@/@DEFAULT_CONFIG@"		# log directory
-indexdir "@CONFIG_DIR@/@DEFAULT_CONFIG@/index"		# index directory
-#tapelist "@CONFIG_DIR@/@DEFAULT_CONFIG@/tapelist"	# list of used tapes
+infofile "/var/lib/amanda/@DEFAULT_CONFIG@/curinfo"	# database DIRECTORY
+logdir   "/var/lib/amanda/@DEFAULT_CONFIG@"		# log directory
+indexdir "/var/lib/amanda/@DEFAULT_CONFIG@/index"	# index directory
+tapelist "/var/lib/amanda/@DEFAULT_CONFIG@/tapelist"	# list of used tapes
 # tapelist is stored, by default, in the directory that contains amanda.conf
 
 # tapetypes
@@ -696,6 +696,7 @@ define interface local {
 define application-tool app_amgtar {
     comment "amgtar"
     plugin  "amgtar"
+    property "XATTRS" "YES"
     #property "GNUTAR-PATH" "/path/to/gtar"
     #property "GNUTAR-LISTDIR" "/path/to/gnutar_list_dir"
                     #default from gnutar_list_dir setting in amanda-client.conf
@@ -771,3 +772,6 @@ taperscan "taper_lexical"
 # configurations.
 
 #includefile "@CONFIG_DIR@/amanda.conf.main"
+
+#resolves "resource temporarily unavailable" bug
+unreserved-tcp-port 1025,65535

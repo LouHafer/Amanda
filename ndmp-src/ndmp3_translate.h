@@ -38,33 +38,17 @@
 
 
 #ifndef NDMOS_OPTION_NO_NDMP3
-extern int	ndmp_3to9_error (
-			ndmp3_error *error3,
-			ndmp9_error *error9);
-extern int	ndmp_9to3_error (
-			ndmp9_error *error9,
-			ndmp3_error *error3);
+extern int	ndmp_3to9_error (void *vxbody, void *v9body) ;
+extern int	ndmp_9to3_error (void *v9body, void *vxbody) ;
 
-extern int	ndmp_3to9_data_get_state_reply (
-			ndmp3_data_get_state_reply *reply3,
-			ndmp9_data_get_state_reply *reply9);
-extern int	ndmp_9to3_data_get_state_reply (
-			ndmp9_data_get_state_reply *reply9,
-			ndmp3_data_get_state_reply *reply3);
+extern int	ndmp_3to9_data_get_state_reply (void *vxbody, void *v9body) ;
+extern int	ndmp_9to3_data_get_state_reply (void *v9body, void *vxbody) ;
 
-extern int	ndmp_3to9_tape_get_state_reply (
-			ndmp3_tape_get_state_reply *reply3,
-			ndmp9_tape_get_state_reply *reply9);
-extern int	ndmp_9to3_tape_get_state_reply (
-			ndmp9_tape_get_state_reply *reply9,
-			ndmp3_tape_get_state_reply *reply3);
+extern int	ndmp_3to9_tape_get_state_reply (void *vxbody, void *v9body) ;
+extern int	ndmp_9to3_tape_get_state_reply (void *v9body, void *vxbody) ;
 
-extern int	ndmp_3to9_mover_get_state_reply (
-			ndmp3_mover_get_state_reply *reply3,
-			ndmp9_mover_get_state_reply *reply9);
-extern int	ndmp_9to3_mover_get_state_reply (
-			ndmp9_mover_get_state_reply *reply9,
-			ndmp3_mover_get_state_reply *reply3);
+extern int	ndmp_3to9_mover_get_state_reply (void *vxbody, void *v9body) ;
+extern int	ndmp_9to3_mover_get_state_reply (void *v9body, void *vxbody) ;
 
 extern int	ndmp_3to9_addr (
 			ndmp3_addr *addr3,

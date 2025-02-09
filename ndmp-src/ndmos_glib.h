@@ -62,7 +62,7 @@
 
 #define NDMOS_OPTION_USE_SELECT_FOR_CHAN_POLL
 
-#define NDMOS_API_BCOPY(S,D,N) g_memmove((void*)(D), (void*)(S), (N))
+#define NDMOS_API_BCOPY(S,D,N) memmove((void*)(D), (void*)(S), (N))
 /* default: NDMOS_API_BZERO */
 #define NDMOS_API_MALLOC(N) g_malloc((N))
 #define NDMOS_API_FREE(P) g_free((void*)(P))

@@ -154,15 +154,15 @@ struct reqrep_xlate {
 	int		vx_message;
 	ndmp9_message	v9_message;
 
-	int		(*request_xto9) (/* void *vxbody, void *v9body */);
-	int		(*request_9tox) (/* void *v9body, void *vxbody */);
-	int		(*reply_xto9) (/* void *vxbody, void *v9body */);
-	int		(*reply_9tox) (/* void *v9body, void *vxbody */);
+	int		(*request_xto9) (void *vxbody, void *v9body);
+	int		(*request_9tox) (void *v9body, void *vxbody);
+	int		(*reply_xto9) (void *vxbody, void *v9body);
+	int		(*reply_9tox) (void *v9body, void *vxbody);
 
-	int		(*free_request_xto9) (/* void *v9body */);
-	int		(*free_request_9tox) (/* void *vxbody */);
-	int		(*free_reply_xto9) (/* void *v9body */);
-	int		(*free_reply_9tox) (/* void *vxbody */);
+	int		(*free_request_xto9) (void *v9body);
+	int		(*free_request_9tox) (void *vxbody);
+	int		(*free_reply_xto9) (void *v9body);
+	int		(*free_reply_9tox) (void *vxbody);
 
 };
 

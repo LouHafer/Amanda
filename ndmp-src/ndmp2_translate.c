@@ -82,22 +82,25 @@ struct enum_conversion ndmp_29_error[] = {
 };
 
 
-int
-ndmp_2to9_error (
-  ndmp2_error *error2,
-  ndmp9_error *error9)
+int ndmp_2to9_error (void *vxbody, void *v9body)
 {
-	*error9 = convert_enum_to_9 (ndmp_29_error, *error2);
-	return 0;
+  ndmp2_error *error2 = (ndmp2_error *) vxbody ;
+  ndmp9_error *error9 = (ndmp9_error *) v9body ;
+
+  *error9 = convert_enum_to_9 (ndmp_29_error, *error2) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_error (
-  ndmp9_error *error9,
-  ndmp2_error *error2)
+
+int ndmp_9to2_error (void *vxbody, void *v9body)
 {
-	*error2 = convert_enum_from_9 (ndmp_29_error, *error9);
-	return 0;
+  ndmp9_error *error9 = (ndmp9_error *) v9body ;
+  ndmp2_error *error2 = (ndmp2_error *) vxbody ;
+
+  *error2 = convert_enum_from_9 (ndmp_29_error, *error9) ;
+
+  return 0 ;
 }
 
 
@@ -443,23 +446,30 @@ ndmp_9to2_auth_attr (
  * just error reply
  */
 
-int
-ndmp_2to9_connect_open_request (
-  ndmp2_connect_open_request *request2,
-  ndmp9_connect_open_request *request9)
+int ndmp_2to9_connect_open_request (void *vxbody, void *v9body)
 {
-	CNVT_TO_9 (request2, request9, protocol_version);
-	return 0;
+  ndmp2_connect_open_request *request2 =
+      (ndmp2_connect_open_request *) vxbody ;
+  ndmp9_connect_open_request *request9 =
+      (ndmp9_connect_open_request *) v9body ;
+
+  CNVT_TO_9 (request2, request9, protocol_version) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_connect_open_request (
-  ndmp9_connect_open_request *request9,
-  ndmp2_connect_open_request *request2)
+int ndmp_9to2_connect_open_request (void *v9body, void *vxbody)
 {
-	CNVT_FROM_9 (request2, request9, protocol_version);
-	return 0;
+  ndmp9_connect_open_request *request9 =
+      (ndmp9_connect_open_request *) v9body ;
+  ndmp2_connect_open_request *request2 =
+      (ndmp2_connect_open_request *) vxbody ;
+
+  CNVT_FROM_9 (request2, request9, protocol_version) ;
+
+  return 0 ;
 }
+
 
 
 /*
@@ -467,31 +477,34 @@ ndmp_9to2_connect_open_request (
  * just error reply
  */
 
-
-
-int
-ndmp_2to9_connect_client_auth_request (
-  ndmp2_connect_client_auth_request *request2,
-  ndmp9_connect_client_auth_request *request9)
+int ndmp_2to9_connect_client_auth_request (void *vxbody, void *v9body)
 {
-	int		rc;
+  ndmp2_connect_client_auth_request *request2 =
+      (ndmp2_connect_client_auth_request *) vxbody ;
+  ndmp9_connect_client_auth_request *request9 =
+      (ndmp9_connect_client_auth_request *) v9body ;
 
-	rc = ndmp_2to9_auth_data (&request2->auth_data, &request9->auth_data);
+  int rc ;
 
-	return rc;
+  rc = ndmp_2to9_auth_data(&request2->auth_data, &request9->auth_data) ;
+
+  return rc ;
 }
 
-int
-ndmp_9to2_connect_client_auth_request (
-  ndmp9_connect_client_auth_request *request9,
-  ndmp2_connect_client_auth_request *request2)
+int ndmp_9to2_connect_client_auth_request (void *v9body, void *vxbody)
 {
-	int		rc;
+  ndmp9_connect_client_auth_request *request9 =
+      (ndmp9_connect_client_auth_request *) v9body ;
+  ndmp2_connect_client_auth_request *request2 =
+      (ndmp2_connect_client_auth_request *) vxbody ;
 
-	rc = ndmp_9to2_auth_data (&request9->auth_data, &request2->auth_data);
+  int rc ;
 
-	return rc;
+  rc = ndmp_9to2_auth_data(&request9->auth_data, &request2->auth_data) ;
+
+  return rc ;
 }
+
 
 
 /*
@@ -533,79 +546,77 @@ ndmp_9to2_connect_server_auth_request (
  * no args request
  */
 
-int
-ndmp_2to9_config_get_host_info_reply (
-  ndmp2_config_get_host_info_reply *reply2,
-  ndmp9_config_get_host_info_reply *reply9)
+int ndmp_2to9_config_get_host_info_reply (void *vxbody, void *v9body)
 {
-	unsigned int	i, n_error = 0;
+  ndmp2_config_get_host_info_reply *reply2 =
+      (ndmp2_config_get_host_info_reply *) vxbody ;
+  ndmp9_config_get_host_info_reply *reply9 =
+      (ndmp9_config_get_host_info_reply *) v9body ;
 
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_STRDUP_TO_9x (reply2, reply9, hostname, config_info.hostname);
-	CNVT_STRDUP_TO_9x (reply2, reply9, os_type, config_info.os_type);
-	CNVT_STRDUP_TO_9x (reply2, reply9, os_vers, config_info.os_vers);
-	CNVT_STRDUP_TO_9x (reply2, reply9, hostid, config_info.hostid);
+  unsigned int i, n_error = 0 ;
 
-	reply9->config_info.authtypes = 0;
-	for (i = 0; i < reply2->auth_type.auth_type_len; i++) {
-		switch (reply2->auth_type.auth_type_val[i]) {
-		case NDMP2_AUTH_NONE:
-			reply9->config_info.authtypes |=
-				NDMP9_CONFIG_AUTHTYPE_NONE;
-			break;
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_STRDUP_TO_9x(reply2, reply9, hostname, config_info.hostname) ;
+  CNVT_STRDUP_TO_9x(reply2, reply9, os_type, config_info.os_type) ;
+  CNVT_STRDUP_TO_9x(reply2, reply9, os_vers, config_info.os_vers) ;
+  CNVT_STRDUP_TO_9x(reply2, reply9, hostid, config_info.hostid) ;
 
-		case NDMP2_AUTH_TEXT:
-			reply9->config_info.authtypes |=
-				NDMP9_CONFIG_AUTHTYPE_TEXT;
-			break;
+  reply9->config_info.authtypes = 0 ;
+  for (i = 0 ; i < reply2->auth_type.auth_type_len ; i++) {
+    switch (reply2->auth_type.auth_type_val[i]) {
+      case NDMP2_AUTH_NONE:
+      { reply9->config_info.authtypes |= NDMP9_CONFIG_AUTHTYPE_NONE ;
+	break ; }
+      case NDMP2_AUTH_TEXT:
+      { reply9->config_info.authtypes |= NDMP9_CONFIG_AUTHTYPE_TEXT ;
+	break ; }
+      case NDMP2_AUTH_MD5:
+      { reply9->config_info.authtypes |= NDMP9_CONFIG_AUTHTYPE_MD5 ;
+	break ; }
+      default:
+      { n_error++ ;
+	/* ignore */
+	break ; }
+    }
+  }
 
-		case NDMP2_AUTH_MD5:
-			reply9->config_info.authtypes |=
-				NDMP9_CONFIG_AUTHTYPE_MD5;
-			break;
-
-		default:
-			n_error++;
-			/* ignore */
-			break;
-		}
-	}
-
-	return n_error;
+  return n_error ;
 }
 
-int
-ndmp_9to2_config_get_host_info_reply (
-  ndmp9_config_get_host_info_reply *reply9,
-  ndmp2_config_get_host_info_reply *reply2)
+int ndmp_9to2_config_get_host_info_reply (void *v9body, void *vxbody)
 {
-	int			i = 0;
+  ndmp9_config_get_host_info_reply *reply9 =
+      (ndmp9_config_get_host_info_reply *) v9body ;
+  ndmp2_config_get_host_info_reply *reply2 =
+      (ndmp2_config_get_host_info_reply *) vxbody ;
 
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_STRDUP_FROM_9x (reply2, reply9, hostname, config_info.hostname);
-	CNVT_STRDUP_FROM_9x (reply2, reply9, os_type, config_info.os_type);
-	CNVT_STRDUP_FROM_9x (reply2, reply9, os_vers, config_info.os_vers);
-	CNVT_STRDUP_FROM_9x (reply2, reply9, hostid, config_info.hostid);
+  int i = 0 ;
 
-	reply2->auth_type.auth_type_val = NDMOS_MACRO_NEWN(ndmp2_auth_type, 3);
-	if (!reply2->auth_type.auth_type_val) {
-		return -1;
-	}
+  CNVT_E_FROM_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_STRDUP_FROM_9x(reply2, reply9, hostname, config_info.hostname) ;
+  CNVT_STRDUP_FROM_9x(reply2, reply9, os_type, config_info.os_type) ;
+  CNVT_STRDUP_FROM_9x(reply2, reply9, os_vers, config_info.os_vers) ;
+  CNVT_STRDUP_FROM_9x(reply2, reply9, hostid, config_info.hostid) ;
 
-	i = 0;
-	if (reply9->config_info.authtypes & NDMP9_CONFIG_AUTHTYPE_NONE) {
-		reply2->auth_type.auth_type_val[i++] = NDMP2_AUTH_NONE;
-	}
-	if (reply9->config_info.authtypes & NDMP9_CONFIG_AUTHTYPE_TEXT) {
-		reply2->auth_type.auth_type_val[i++] = NDMP2_AUTH_TEXT;
-	}
-	if (reply9->config_info.authtypes & NDMP9_CONFIG_AUTHTYPE_MD5) {
-		reply2->auth_type.auth_type_val[i++] = NDMP2_AUTH_MD5;
-	}
-	reply2->auth_type.auth_type_len	= i;
+  reply2->auth_type.auth_type_val = NDMOS_MACRO_NEWN(ndmp2_auth_type, 3) ;
+  if (!reply2->auth_type.auth_type_val) { return -1 ; }
 
-	return 0;
+  i = 0 ;
+  if (reply9->config_info.authtypes & NDMP9_CONFIG_AUTHTYPE_NONE) {
+    reply2->auth_type.auth_type_val[i++] = NDMP2_AUTH_NONE ;
+  }
+  if (reply9->config_info.authtypes & NDMP9_CONFIG_AUTHTYPE_TEXT) {
+    reply2->auth_type.auth_type_val[i++] = NDMP2_AUTH_TEXT ;
+  }
+  if (reply9->config_info.authtypes & NDMP9_CONFIG_AUTHTYPE_MD5) {
+    reply2->auth_type.auth_type_val[i++] = NDMP2_AUTH_MD5 ;
+  }
+  reply2->auth_type.auth_type_len = i ;
+
+  return 0 ;
 }
+
+
 
 
 /*
@@ -621,134 +632,139 @@ ndmp_9to2_config_get_host_info_reply (
  * no args request
  */
 
-int
-ndmp_2to9_config_get_mover_type_reply (
-  ndmp2_config_get_mover_type_reply *reply2,
-  ndmp9_config_get_connection_type_reply *reply9)
+int ndmp_2to9_config_get_mover_type_reply (void *vxbody, void *v9body)
 {
-	int			n_error = 0;
-	unsigned int		i;
+  ndmp2_config_get_mover_type_reply *reply2 =
+      (ndmp2_config_get_mover_type_reply *) vxbody ;
+  ndmp9_config_get_connection_type_reply *reply9 =
+      (ndmp9_config_get_connection_type_reply *) v9body ;
 
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
-	for (i = 0; i < reply2->methods.methods_len; i++) {
-		switch (reply2->methods.methods_val[i]) {
-		case NDMP2_ADDR_LOCAL:
-			reply9->config_info.conntypes |=
-				NDMP9_CONFIG_CONNTYPE_LOCAL;
-			break;
+  int n_error = 0 ;
+  unsigned int i ;
 
-		case NDMP2_ADDR_TCP:
-			reply9->config_info.conntypes |=
-				NDMP9_CONFIG_CONNTYPE_TCP;
-			break;
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
+  for (i = 0 ; i < reply2->methods.methods_len ; i++) {
+    switch (reply2->methods.methods_val[i]) {
+      case NDMP2_ADDR_LOCAL:
+      { reply9->config_info.conntypes |= NDMP9_CONFIG_CONNTYPE_LOCAL ;
+	break ; }
+      case NDMP2_ADDR_TCP:
+      { reply9->config_info.conntypes |= NDMP9_CONFIG_CONNTYPE_TCP ;
+	break ; }
+      default:
+      { n_error++ ;
+	/* ignore */
+	break ; }
+    }
+  }
 
-		default:
-			n_error++;
-			/* ignore */
-			break;
-		}
-	}
-
-	return n_error;
+  return n_error ;
 }
 
-int
-ndmp_9to2_config_get_mover_type_reply (
-  ndmp9_config_get_connection_type_reply *reply9,
-  ndmp2_config_get_mover_type_reply *reply2)
+int ndmp_9to2_config_get_mover_type_reply (void *v9body, void *vxbody)
 {
-	int			i = 0;
+  ndmp9_config_get_connection_type_reply *reply9 =
+      (ndmp9_config_get_connection_type_reply *) v9body ;
+  ndmp2_config_get_mover_type_reply *reply2 =
+      (ndmp2_config_get_mover_type_reply *) vxbody ;
 
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
+  int i = 0 ;
 
-	reply2->methods.methods_val =
-			NDMOS_MACRO_NEWN(ndmp2_mover_addr_type, 3);
-	if (!reply2->methods.methods_val) {
-		return -1;	/* no mem */
-	}
+  CNVT_E_FROM_9(reply2, reply9, error, ndmp_29_error) ;
 
-	i = 0;
-	if (reply9->config_info.conntypes & NDMP9_CONFIG_CONNTYPE_LOCAL) {
-		reply2->methods.methods_val[i++] = NDMP2_ADDR_LOCAL;
-	}
-	if (reply9->config_info.conntypes & NDMP9_CONFIG_CONNTYPE_TCP) {
-		reply2->methods.methods_val[i++] = NDMP2_ADDR_TCP;
-	}
-	reply2->methods.methods_len = i;
+  reply2->methods.methods_val = NDMOS_MACRO_NEWN(ndmp2_mover_addr_type, 3) ;
+  if (!reply2->methods.methods_val) {
+	  return -1 ;	/* no mem */
+  }
 
-	return 0;
+  i = 0 ;
+  if (reply9->config_info.conntypes & NDMP9_CONFIG_CONNTYPE_LOCAL) {
+    reply2->methods.methods_val[i++] = NDMP2_ADDR_LOCAL ;
+  }
+  if (reply9->config_info.conntypes & NDMP9_CONFIG_CONNTYPE_TCP) {
+    reply2->methods.methods_val[i++] = NDMP2_ADDR_TCP ;
+  }
+  reply2->methods.methods_len = i ;
+
+  return 0 ;
 }
+
 
 
 /*
  * ndmp_config_get_auth_attr
  */
 
-int
-ndmp_2to9_config_get_auth_attr_request (
-  struct ndmp2_config_get_auth_attr_request *request2,
-  struct ndmp9_config_get_auth_attr_request *request9)
+int ndmp_2to9_config_get_auth_attr_request (void *vxbody, void *v9body)
 {
-	int		n_error = 0;
-	int		rc;
+  struct ndmp2_config_get_auth_attr_request *request2 =
+      (struct ndmp2_config_get_auth_attr_request *) vxbody ;
+  struct ndmp9_config_get_auth_attr_request *request9 =
+      (struct ndmp9_config_get_auth_attr_request *) v9body ;
 
-	rc = CNVT_E_TO_9 (request2, request9, auth_type, ndmp_29_auth_type);
-	if (rc == NDMP_INVALID_GENERAL) {
-		CNVT_TO_9 (request2, request9, auth_type);
-		n_error++;
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	return n_error;
+  rc = CNVT_E_TO_9(request2, request9, auth_type, ndmp_29_auth_type) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_TO_9(request2, request9, auth_type) ;
+    n_error++ ;
+  }
+
+  return n_error ;
 }
 
-int
-ndmp_9to2_config_get_auth_attr_request (
-  struct ndmp9_config_get_auth_attr_request *request9,
-  struct ndmp2_config_get_auth_attr_request *request2)
+int ndmp_9to2_config_get_auth_attr_request (void *v9body, void *vxbody)
 {
-	int		n_error = 0;
-	int		rc;
+  struct ndmp9_config_get_auth_attr_request *request9 =
+      (struct ndmp9_config_get_auth_attr_request *) v9body ;
+  struct ndmp2_config_get_auth_attr_request *request2 =
+      (struct ndmp2_config_get_auth_attr_request *) vxbody ;
 
-	rc = CNVT_E_FROM_9 (request2, request9, auth_type, ndmp_29_auth_type);
-	if (rc == NDMP_INVALID_GENERAL) {
-		CNVT_FROM_9 (request2, request9, auth_type);
-		n_error++;
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	return n_error;
-}
+  rc = CNVT_E_FROM_9(request2, request9, auth_type, ndmp_29_auth_type) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_FROM_9(request2, request9, auth_type) ;
+    n_error++ ;
+  }
 
-int
-ndmp_2to9_config_get_auth_attr_reply (
-  struct ndmp2_config_get_auth_attr_reply *reply2,
-  struct ndmp9_config_get_auth_attr_reply *reply9)
-{
-	int		n_error = 0;
-
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
-
-	n_error += ndmp_2to9_auth_attr (&reply2->server_attr,
-					&reply9->server_attr);
-
-	return n_error;
-}
-
-int
-ndmp_9to2_config_get_auth_attr_reply (
-  struct ndmp9_config_get_auth_attr_reply *reply9,
-  struct ndmp2_config_get_auth_attr_reply *reply2)
-{
-	int		n_error = 0;
-
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
-
-	n_error += ndmp_9to2_auth_attr (&reply9->server_attr,
-					&reply2->server_attr);
-
-	return n_error;
+  return n_error ;
 }
 
 
+int ndmp_2to9_config_get_auth_attr_reply (void *vxbody, void *v9body)
+{
+  struct ndmp2_config_get_auth_attr_reply *reply2 =
+      (struct ndmp2_config_get_auth_attr_reply *) vxbody ;
+  struct ndmp9_config_get_auth_attr_reply *reply9 =
+      (struct ndmp9_config_get_auth_attr_reply *) v9body ;
+
+  int n_error = 0 ;
+
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
+
+  n_error += ndmp_2to9_auth_attr(&reply2->server_attr,&reply9->server_attr) ;
+
+  return n_error ;
+}
+
+int ndmp_9to2_config_get_auth_attr_reply (void *v9body, void *vxbody)
+{
+  struct ndmp9_config_get_auth_attr_reply *reply9 =
+      (struct ndmp9_config_get_auth_attr_reply *) v9body ;
+  struct ndmp2_config_get_auth_attr_reply *reply2 =
+      (struct ndmp2_config_get_auth_attr_reply *) vxbody ;
+
+  int n_error = 0 ;
+
+  CNVT_E_FROM_9(reply2, reply9, error, ndmp_29_error) ;
+
+  n_error += ndmp_9to2_auth_attr(&reply9->server_attr,&reply2->server_attr) ;
+
+  return n_error ;
+}
 
 
 /*
@@ -760,29 +776,33 @@ ndmp_9to2_config_get_auth_attr_reply (
  * ndmp_scsi_open
  * just error reply
  */
-int
-ndmp_2to9_scsi_open_request (
-  ndmp2_scsi_open_request *request2,
-  ndmp9_scsi_open_request *request9)
+
+int ndmp_2to9_scsi_open_request (void *vxbody, void *v9body)
 {
-	request9->device = NDMOS_API_STRDUP (request2->device.name);
-	if (!request9->device) {
-		return -1;	/* no memory */
-	}
-	return 0;
+  ndmp2_scsi_open_request *request2 = (ndmp2_scsi_open_request *) vxbody ;
+  ndmp9_scsi_open_request *request9 = (ndmp9_scsi_open_request *) v9body ;
+
+  request9->device = NDMOS_API_STRDUP(request2->device.name) ;
+  if (!request9->device) {
+	  return -1 ;	/* no memory */
+  }
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_scsi_open_request (
-  ndmp9_scsi_open_request *request9,
-  ndmp2_scsi_open_request *request2)
+int ndmp_9to2_scsi_open_request (void *v9body, void *vxbody)
 {
-	request2->device.name = NDMOS_API_STRDUP (request9->device);
-	if (!request2->device.name) {
-		return -1;	/* no memory */
-	}
-	return 0;
+  ndmp9_scsi_open_request *request9 = (ndmp9_scsi_open_request *) v9body ;
+  ndmp2_scsi_open_request *request2 = (ndmp2_scsi_open_request *) vxbody ;
+
+  request2->device.name = NDMOS_API_STRDUP(request9->device) ;
+  if (!request2->device.name) {
+	  return -1 ;	/* no memory */
+  }
+
+  return 0 ;
 }
+
 
 /*
  * ndmp_scsi_close
@@ -794,70 +814,78 @@ ndmp_9to2_scsi_open_request (
  * no args request
  */
 
-int
-ndmp_2to9_scsi_get_state_reply (
-  ndmp2_scsi_get_state_reply *reply2,
-  ndmp9_scsi_get_state_reply *reply9)
+int ndmp_2to9_scsi_get_state_reply (void *vxbody, void *v9body)
 {
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_TO_9 (reply2, reply9, target_controller);
-	CNVT_TO_9 (reply2, reply9, target_id);
-	CNVT_TO_9 (reply2, reply9, target_lun);
+  ndmp2_scsi_get_state_reply *reply2 = (ndmp2_scsi_get_state_reply *) vxbody ;
+  ndmp9_scsi_get_state_reply *reply9 = (ndmp9_scsi_get_state_reply *) v9body ;
 
-	return 0;
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_TO_9(reply2, reply9, target_controller) ;
+  CNVT_TO_9(reply2, reply9, target_id) ;
+  CNVT_TO_9(reply2, reply9, target_lun) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_scsi_get_state_reply (
-  ndmp9_scsi_get_state_reply *reply9,
-  ndmp2_scsi_get_state_reply *reply2)
+int ndmp_9to2_scsi_get_state_reply (void *v9body, void *vxbody)
 {
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_FROM_9 (reply2, reply9, target_controller);
-	CNVT_FROM_9 (reply2, reply9, target_id);
-	CNVT_FROM_9 (reply2, reply9, target_lun);
+  ndmp9_scsi_get_state_reply *reply9 = (ndmp9_scsi_get_state_reply *) v9body ;
+  ndmp2_scsi_get_state_reply *reply2 = (ndmp2_scsi_get_state_reply *) vxbody ;
 
-	return 0;
+  CNVT_E_FROM_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_FROM_9(reply2, reply9, target_controller) ;
+  CNVT_FROM_9(reply2, reply9, target_id) ;
+  CNVT_FROM_9(reply2, reply9, target_lun) ;
+
+  return 0 ;
 }
+
+
 
 /*
  * ndmp_scsi_set_target -- deprecated
  * just error reply
  */
 
-int
-ndmp_2to9_scsi_set_target_request (
-  ndmp2_scsi_set_target_request *request2,
-  ndmp9_scsi_set_target_request *request9)
+int ndmp_2to9_scsi_set_target_request (void *vxbody, void *v9body)
 {
-	request9->device = NDMOS_API_STRDUP (request2->device.name);
-	if (!request9->device) {
-		return -1;	/* no memory */
-	}
+  ndmp2_scsi_set_target_request *request2 =
+      (ndmp2_scsi_set_target_request *) vxbody ;
+  ndmp9_scsi_set_target_request *request9 =
+      (ndmp9_scsi_set_target_request *) v9body ;
 
-	CNVT_TO_9 (request2, request9, target_controller);
-	CNVT_TO_9 (request2, request9, target_id);
-	CNVT_TO_9 (request2, request9, target_lun);
+  request9->device = NDMOS_API_STRDUP(request2->device.name) ;
+  if (!request9->device) {
+	  return -1 ;	// no memory
+  }
 
-	return 0;
+  CNVT_TO_9(request2, request9, target_controller) ;
+  CNVT_TO_9(request2, request9, target_id) ;
+  CNVT_TO_9(request2, request9, target_lun) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_scsi_set_target_request (
-  ndmp9_scsi_set_target_request *request9,
-  ndmp2_scsi_set_target_request *request2)
+int ndmp_9to2_scsi_set_target_request (void *v9body, void *vxbody)
 {
-	request2->device.name = NDMOS_API_STRDUP (request9->device);
-	if (!request2->device.name) {
-		return -1;	/* no memory */
-	}
+  ndmp9_scsi_set_target_request *request9 =
+      (ndmp9_scsi_set_target_request *) v9body ;
+  ndmp2_scsi_set_target_request *request2 =
+      ( ndmp2_scsi_set_target_request *) vxbody ;
 
-	CNVT_FROM_9 (request2, request9, target_controller);
-	CNVT_FROM_9 (request2, request9, target_id);
-	CNVT_FROM_9 (request2, request9, target_lun);
+  request2->device.name = NDMOS_API_STRDUP(request9->device) ;
+  if (!request2->device.name) {
+	  return -1 ;	// no memory
+  }
 
-	return 0;
+  CNVT_FROM_9(request2, request9, target_controller) ;
+  CNVT_FROM_9(request2, request9, target_id) ;
+  CNVT_FROM_9(request2, request9, target_lun) ;
+
+  return 0 ;
 }
+
+
 
 /*
  * ndmp_scsi_reset_device
@@ -875,237 +903,223 @@ ndmp_9to2_scsi_set_target_request (
  * ndmp_scsi_execute_cdb
  */
 
-int
-ndmp_2to9_execute_cdb_request (
-  ndmp2_execute_cdb_request *request2,
-  ndmp9_execute_cdb_request *request9)
+int ndmp_2to9_execute_cdb_request (void *vxbody, void *v9body)
 {
-	int		n_error = 0;
-	u_long		len;
-	char *		p;
+  ndmp2_execute_cdb_request *request2 = (ndmp2_execute_cdb_request *) vxbody ;
+  ndmp9_execute_cdb_request *request9 = (ndmp9_execute_cdb_request *) v9body ;
 
-	switch (request2->flags) {
-	case 0:
-		request9->data_dir = NDMP9_SCSI_DATA_DIR_NONE;
-		break;
+  int n_error = 0 ;
+  u_long len ;
+  char *p ;
 
-	case NDMP2_SCSI_DATA_IN:
-		request9->data_dir = NDMP9_SCSI_DATA_DIR_IN;
-		break;
+  switch (request2->flags) {
+    case 0:
+    { request9->data_dir = NDMP9_SCSI_DATA_DIR_NONE ;
+      break ; }
+    case NDMP2_SCSI_DATA_IN:
+    { request9->data_dir = NDMP9_SCSI_DATA_DIR_IN ;
+      break ; }
+    case NDMP2_SCSI_DATA_OUT:
+    { request9->data_dir = NDMP9_SCSI_DATA_DIR_IN ;
+      break ; }
+    default:
+    { /* deemed insolvable */
+      n_error++ ;
+      return -1 ; }
+  }
 
-	case NDMP2_SCSI_DATA_OUT:
-		request9->data_dir = NDMP9_SCSI_DATA_DIR_IN;
-		break;
+  CNVT_TO_9(request2, request9, timeout) ;
+  CNVT_TO_9(request2, request9, datain_len) ;
 
-	default:
-		/* deemed insolvable */
-		n_error++;
-		return -1;
-	}
+  len = request2->dataout.dataout_len ;
+  if (len > 0) {
+    p = NDMOS_API_MALLOC (len) ;
+    if (!p) { return -1 ; }
+    NDMOS_API_BCOPY (request2->dataout.dataout_val, p, len) ;
+  } else {
+    len = 0 ;
+    p = 0 ;
+  }
+  request9->dataout.dataout_len = len ;
+  request9->dataout.dataout_val = p ;
 
-	CNVT_TO_9 (request2, request9, timeout);
-	CNVT_TO_9 (request2, request9, datain_len);
+  len = request2->cdb.cdb_len ;
+  if (len > 0) {
+    p = NDMOS_API_MALLOC(len) ;
+    if (!p) {
+      if (request9->dataout.dataout_val) {
+	NDMOS_API_FREE(request9->dataout.dataout_val) ;
+	request9->dataout.dataout_len = 0 ;
+	request9->dataout.dataout_val = 0 ;
+      }
+      return -1 ;
+    }
+    NDMOS_API_BCOPY(request2->cdb.cdb_val, p, len) ;
+  } else {
+    len = 0 ;
+    p = 0 ;
+  }
+  request9->cdb.cdb_len = len ;
+  request9->cdb.cdb_val = p ;
 
-	len = request2->dataout.dataout_len;
-	if (len > 0) {
-		p = NDMOS_API_MALLOC (len);
-		if (!p) {
-			return -1;
-		}
-		NDMOS_API_BCOPY (request2->dataout.dataout_val, p, len);
-	} else {
-		len = 0;
-		p = 0;
-	}
-	request9->dataout.dataout_len = len;
-	request9->dataout.dataout_val = p;
-
-	len = request2->cdb.cdb_len;
-	if (len > 0) {
-		p = NDMOS_API_MALLOC (len);
-		if (!p) {
-			if (request9->dataout.dataout_val) {
-				NDMOS_API_FREE (request9->dataout.dataout_val);
-				request9->dataout.dataout_len = 0;
-				request9->dataout.dataout_val = 0;
-			}
-			return -1;
-		}
-		NDMOS_API_BCOPY (request2->cdb.cdb_val, p, len);
-	} else {
-		len = 0;
-		p = 0;
-	}
-	request9->cdb.cdb_len = len;
-	request9->cdb.cdb_val = p;
-
-	return 0;
-}
-
-int
-ndmp_9to2_execute_cdb_request (
-  ndmp9_execute_cdb_request *request9,
-  ndmp2_execute_cdb_request *request2)
-{
-	int		n_error = 0;
-	u_long		len;
-	char *		p;
-
-	switch (request9->data_dir) {
-	case NDMP9_SCSI_DATA_DIR_NONE:
-		request2->flags = 0;
-		break;
-
-	case NDMP9_SCSI_DATA_DIR_IN:
-		request2->flags = NDMP2_SCSI_DATA_IN;
-		break;
-
-	case NDMP9_SCSI_DATA_DIR_OUT:
-		request2->flags = NDMP2_SCSI_DATA_OUT;
-		break;
-
-	default:
-		/* deemed insolvable */
-		n_error++;
-		return -1;
-	}
-
-	CNVT_FROM_9 (request2, request9, timeout);
-	CNVT_FROM_9 (request2, request9, datain_len);
-
-	len = request9->dataout.dataout_len;
-	if (len > 0) {
-		p = NDMOS_API_MALLOC (len);
-		if (!p) {
-			return -1;
-		}
-		NDMOS_API_BCOPY (request9->dataout.dataout_val, p, len);
-	} else {
-		len = 0;
-		p = 0;
-	}
-	request2->dataout.dataout_len = len;
-	request2->dataout.dataout_val = p;
-
-	len = request9->cdb.cdb_len;
-	if (len > 0) {
-		p = NDMOS_API_MALLOC (len);
-		if (!p) {
-			if (request2->dataout.dataout_val) {
-				NDMOS_API_FREE (request2->dataout.dataout_val);
-				request2->dataout.dataout_len = 0;
-				request2->dataout.dataout_val = 0;
-			}
-			return -1;
-		}
-		NDMOS_API_BCOPY (request9->cdb.cdb_val, p, len);
-	} else {
-		len = 0;
-		p = 0;
-	}
-	request2->cdb.cdb_len = len;
-	request2->cdb.cdb_val = p;
-
-	return 0;
-}
-
-int
-ndmp_2to9_execute_cdb_reply (
-  ndmp2_execute_cdb_reply *reply2,
-  ndmp9_execute_cdb_reply *reply9)
-{
-	u_long		len;
-	char *		p;
-
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_TO_9 (reply2, reply9, status);
-	CNVT_TO_9 (reply2, reply9, dataout_len);
-
-	len = reply2->datain.datain_len;
-	if (len > 0) {
-		p = NDMOS_API_MALLOC (len);
-		if (!p) {
-			return -1;
-		}
-		NDMOS_API_BCOPY (reply2->datain.datain_val, p, len);
-	} else {
-		len = 0;
-		p = 0;
-	}
-	reply9->datain.datain_len = len;
-	reply9->datain.datain_val = p;
-
-	len = reply2->ext_sense.ext_sense_len;
-	if (len > 0) {
-		p = NDMOS_API_MALLOC (len);
-		if (!p) {
-			if (reply9->datain.datain_val) {
-				NDMOS_API_FREE (reply9->datain.datain_val);
-				reply9->datain.datain_len = 0;
-				reply9->datain.datain_val = 0;
-			}
-			return -1;
-		}
-		NDMOS_API_BCOPY (reply2->ext_sense.ext_sense_val, p, len);
-	} else {
-		len = 0;
-		p = 0;
-	}
-	reply9->ext_sense.ext_sense_len = len;
-	reply9->ext_sense.ext_sense_val = p;
-
-	return 0;
-}
-
-int
-ndmp_9to2_execute_cdb_reply (
-  ndmp9_execute_cdb_reply *reply9,
-  ndmp2_execute_cdb_reply *reply2)
-{
-	u_long		len;
-	char *		p;
-
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_FROM_9 (reply2, reply9, status);
-	CNVT_FROM_9 (reply2, reply9, dataout_len);
-
-	len = reply9->datain.datain_len;
-	if (len > 0) {
-		p = NDMOS_API_MALLOC (len);
-		if (!p) {
-			return -1;
-		}
-		NDMOS_API_BCOPY (reply9->datain.datain_val, p, len);
-	} else {
-		len = 0;
-		p = 0;
-	}
-	reply2->datain.datain_len = len;
-	reply2->datain.datain_val = p;
-
-	len = reply9->ext_sense.ext_sense_len;
-	if (len > 0) {
-		p = NDMOS_API_MALLOC (len);
-		if (!p) {
-			if (reply2->datain.datain_val) {
-				NDMOS_API_FREE (reply9->datain.datain_val);
-				reply2->datain.datain_len = 0;
-				reply2->datain.datain_val = 0;
-			}
-			return -1;
-		}
-		NDMOS_API_BCOPY (reply9->ext_sense.ext_sense_val, p, len);
-	} else {
-		len = 0;
-		p = 0;
-	}
-	reply2->ext_sense.ext_sense_len = len;
-	reply2->ext_sense.ext_sense_val = p;
-
-	return 0;
+  return 0 ;
 }
 
 
+int ndmp_9to2_execute_cdb_request (void *v9body, void *vxbody)
+{
+  ndmp9_execute_cdb_request *request9 = (ndmp9_execute_cdb_request *) v9body ;
+  ndmp2_execute_cdb_request *request2 = (ndmp2_execute_cdb_request *) vxbody ;
+
+  int n_error = 0 ;
+  u_long len ;
+  char *p ;
+
+  switch (request9->data_dir) {
+    case NDMP9_SCSI_DATA_DIR_NONE:
+    { request2->flags = 0 ;
+      break ; }
+    case NDMP9_SCSI_DATA_DIR_IN:
+    { request2->flags = NDMP2_SCSI_DATA_IN ;
+      break ; }
+    case NDMP9_SCSI_DATA_DIR_OUT:
+    { request2->flags = NDMP2_SCSI_DATA_OUT ;
+      break ; }
+    default:
+    { /* deemed insolvable */
+      n_error++ ;
+      return -1 ; }
+  }
+
+  CNVT_FROM_9(request2, request9, timeout) ;
+  CNVT_FROM_9(request2, request9, datain_len) ;
+
+  len = request9->dataout.dataout_len ;
+  if (len > 0) {
+    p = NDMOS_API_MALLOC(len) ;
+    if (!p) { return -1 ; }
+    NDMOS_API_BCOPY(request9->dataout.dataout_val, p, len) ;
+  } else {
+    len = 0 ;
+    p = 0 ;
+  }
+  request2->dataout.dataout_len = len ;
+  request2->dataout.dataout_val = p ;
+
+  len = request9->cdb.cdb_len ;
+  if (len > 0) {
+    p = NDMOS_API_MALLOC(len) ;
+    if (!p) {
+      if (request2->dataout.dataout_val) {
+	NDMOS_API_FREE(request2->dataout.dataout_val) ;
+	request2->dataout.dataout_len = 0 ;
+	request2->dataout.dataout_val = 0 ;
+      }
+      return -1 ;
+    }
+    NDMOS_API_BCOPY(request9->cdb.cdb_val, p, len) ;
+  } else {
+    len = 0 ;
+    p = 0 ;
+  }
+  request2->cdb.cdb_len = len ;
+  request2->cdb.cdb_val = p ;
+
+  return 0 ;
+}
+
+
+int ndmp_2to9_execute_cdb_reply (void *vxbody, void *v9body)
+{
+  ndmp2_execute_cdb_reply *reply2 = (ndmp2_execute_cdb_reply *) vxbody ;
+  ndmp9_execute_cdb_reply *reply9 = (ndmp9_execute_cdb_reply *) v9body ;
+
+  u_long len ;
+  char *p ;
+
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_TO_9(reply2, reply9, status) ;
+  CNVT_TO_9(reply2, reply9, dataout_len) ;
+
+  len = reply2->datain.datain_len ;
+  if (len > 0) {
+    p = NDMOS_API_MALLOC(len) ;
+    if (!p) { return -1 ; }
+    NDMOS_API_BCOPY(reply2->datain.datain_val, p, len) ;
+  } else {
+    len = 0 ;
+    p = 0 ;
+  }
+  reply9->datain.datain_len = len ;
+  reply9->datain.datain_val = p ;
+
+  len = reply2->ext_sense.ext_sense_len ;
+  if (len > 0) {
+    p = NDMOS_API_MALLOC(len) ;
+    if (!p) {
+      if (reply9->datain.datain_val) {
+	NDMOS_API_FREE(reply9->datain.datain_val) ;
+	reply9->datain.datain_len = 0 ;
+	reply9->datain.datain_val = 0 ;
+      }
+      return -1 ;
+    }
+    NDMOS_API_BCOPY(reply2->ext_sense.ext_sense_val, p, len) ;
+  } else {
+    len = 0 ;
+    p = 0 ;
+  }
+  reply9->ext_sense.ext_sense_len = len ;
+  reply9->ext_sense.ext_sense_val = p ;
+
+  return 0 ;
+}
+
+int ndmp_9to2_execute_cdb_reply (void *v9body, void *vxbody)
+{
+  ndmp9_execute_cdb_reply *reply9 = (ndmp9_execute_cdb_reply *) v9body ;
+  ndmp2_execute_cdb_reply *reply2 = (ndmp2_execute_cdb_reply *) vxbody ;
+
+  u_long len ;
+  char *p ;
+
+  CNVT_E_FROM_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_FROM_9(reply2, reply9, status) ;
+  CNVT_FROM_9(reply2, reply9, dataout_len) ;
+
+  len = reply9->datain.datain_len ;
+  if (len > 0) {
+    p = NDMOS_API_MALLOC(len) ;
+    if (!p) { return -1 ; }
+    NDMOS_API_BCOPY(reply9->datain.datain_val, p, len) ;
+  } else {
+    len = 0 ;
+    p = 0 ;
+  }
+  reply2->datain.datain_len = len ;
+  reply2->datain.datain_val = p ;
+
+  len = reply9->ext_sense.ext_sense_len ;
+  if (len > 0) {
+    p = NDMOS_API_MALLOC(len) ;
+    if (!p) {
+      if (reply2->datain.datain_val) {
+	NDMOS_API_FREE(reply9->datain.datain_val) ;
+	reply2->datain.datain_len = 0 ;
+	reply2->datain.datain_val = 0 ;
+      }
+      return -1 ;
+    }
+    NDMOS_API_BCOPY(reply9->ext_sense.ext_sense_val, p, len) ;
+  } else {
+    len = 0 ;
+    p = 0 ;
+  }
+  reply2->ext_sense.ext_sense_len = len ;
+  reply2->ext_sense.ext_sense_val = p ;
+
+  return 0 ;
+}
 
 
 /*
@@ -1127,59 +1141,58 @@ struct enum_conversion	ndmp_29_tape_open_mode[] = {
 };
 
 
-
-int
-ndmp_2to9_tape_open_request (
-  ndmp2_tape_open_request *request2,
-  ndmp9_tape_open_request *request9)
+int ndmp_2to9_tape_open_request (void *vxbody, void *v9body)
 {
-	int		n_error = 0;
-	int		rc;
+  ndmp2_tape_open_request *request2 = (ndmp2_tape_open_request *) vxbody ;
+  ndmp9_tape_open_request *request9 = (ndmp9_tape_open_request *) v9body ;
 
-	/*
-	 * Mode codes are compatible between versions.
-	 * We let untranslated values through to
-	 * facilitate testing illegal values.
-	 */
-	rc = convert_enum_to_9 (ndmp_29_tape_open_mode, request2->mode);
-	if (rc == NDMP_INVALID_GENERAL) {
-		n_error++;
-		request9->mode = request2->mode;
-	} else {
-		request9->mode = rc;
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	request9->device = NDMOS_API_STRDUP (request2->device.name);
-	if (!request9->device) {
-		return -1;	/* no memory */
-	}
+  /*
+   * Mode codes are compatible between versions. We let untranslated values
+   * through to facilitate testing illegal values.
+   */
+  rc = convert_enum_to_9(ndmp_29_tape_open_mode, request2->mode) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    n_error++ ;
+    request9->mode = request2->mode ;
+  } else {
+    request9->mode = rc ;
+  }
 
-	return n_error;
+  request9->device = NDMOS_API_STRDUP(request2->device.name) ;
+  if (!request9->device) {
+	  return -1 ;	// no memory
+  }
+
+  return n_error ;
 }
 
-int
-ndmp_9to2_tape_open_request (
-  ndmp9_tape_open_request *request9,
-  ndmp2_tape_open_request *request2)
+int ndmp_9to2_tape_open_request (void *v9body, void *vxbody)
 {
-	int		n_error = 0;
-	int		rc;
+  ndmp9_tape_open_request *request9 = (ndmp9_tape_open_request *) v9body ;
+  ndmp2_tape_open_request *request2 = (ndmp2_tape_open_request *) vxbody ;
 
-	rc = convert_enum_from_9 (ndmp_29_tape_open_mode, request9->mode);
-	if (rc == NDMP_INVALID_GENERAL) {
-		n_error++;
-		request2->mode = request9->mode;
-	} else {
-		request2->mode = rc;
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	request2->device.name = NDMOS_API_STRDUP (request9->device);
-	if (!request2->device.name) {
-		return -1;	/* no memory */
-	}
+  rc = convert_enum_from_9(ndmp_29_tape_open_mode, request9->mode) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    n_error++ ;
+    request2->mode = request9->mode ;
+  } else {
+    request2->mode = rc ;
+  }
 
-	return n_error;
+  request2->device.name = NDMOS_API_STRDUP(request9->device) ;
+  if (!request2->device.name) {
+	  return -1 ;	// no memory
+  }
+
+  return n_error ;
 }
+
 
 
 /*
@@ -1193,40 +1206,39 @@ ndmp_9to2_tape_open_request (
  * no arg request
  */
 
-int
-ndmp_2to9_tape_get_state_reply (
-  ndmp2_tape_get_state_reply *reply2,
-  ndmp9_tape_get_state_reply *reply9)
+int ndmp_2to9_tape_get_state_reply (void *vxbody, void *v9body)
 {
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_TO_9 (reply2, reply9, flags);
-	CNVT_VUL_TO_9 (reply2, reply9, file_num);
-	CNVT_VUL_TO_9 (reply2, reply9, soft_errors);
-	CNVT_VUL_TO_9 (reply2, reply9, block_size);
-	CNVT_VUL_TO_9 (reply2, reply9, blockno);
-	CNVT_VUQ_TO_9 (reply2, reply9, total_space);
-	CNVT_VUQ_TO_9 (reply2, reply9, space_remain);
+  ndmp2_tape_get_state_reply *reply2 = (ndmp2_tape_get_state_reply *) vxbody ;
+  ndmp9_tape_get_state_reply *reply9 = (ndmp9_tape_get_state_reply *) v9body ;
 
-	return 0;
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_TO_9(reply2, reply9, flags) ;
+  CNVT_VUL_TO_9(reply2, reply9, file_num) ;
+  CNVT_VUL_TO_9(reply2, reply9, soft_errors) ;
+  CNVT_VUL_TO_9(reply2, reply9, block_size) ;
+  CNVT_VUL_TO_9(reply2, reply9, blockno) ;
+  CNVT_VUQ_TO_9(reply2, reply9, total_space) ;
+  CNVT_VUQ_TO_9(reply2, reply9, space_remain) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_tape_get_state_reply (
-  ndmp9_tape_get_state_reply *reply9,
-  ndmp2_tape_get_state_reply *reply2)
+int ndmp_9to2_tape_get_state_reply (void *v9body, void *vxbody)
 {
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_FROM_9 (reply2, reply9, flags);
-	CNVT_VUL_FROM_9 (reply2, reply9, file_num);
-	CNVT_VUL_FROM_9 (reply2, reply9, soft_errors);
-	CNVT_VUL_FROM_9 (reply2, reply9, block_size);
-	CNVT_VUL_FROM_9 (reply2, reply9, blockno);
-	CNVT_VUQ_FROM_9 (reply2, reply9, total_space);
-	CNVT_VUQ_FROM_9 (reply2, reply9, space_remain);
+  ndmp9_tape_get_state_reply *reply9 = (ndmp9_tape_get_state_reply *) v9body ;
+  ndmp2_tape_get_state_reply *reply2 = (ndmp2_tape_get_state_reply *) vxbody ;
 
-	return 0;
+  CNVT_E_FROM_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_FROM_9(reply2, reply9, flags) ;
+  CNVT_VUL_FROM_9(reply2, reply9, file_num) ;
+  CNVT_VUL_FROM_9(reply2, reply9, soft_errors) ;
+  CNVT_VUL_FROM_9(reply2, reply9, block_size) ;
+  CNVT_VUL_FROM_9(reply2, reply9, blockno) ;
+  CNVT_VUQ_FROM_9(reply2, reply9, total_space) ;
+  CNVT_VUQ_FROM_9(reply2, reply9, space_remain) ;
+
+  return 0 ;
 }
-
 
 /*
  * ndmp_tape_mtio_request
@@ -1245,133 +1257,138 @@ struct enum_conversion	ndmp_29_tape_mtio_op[] = {
 };
 
 
-int
-ndmp_2to9_tape_mtio_request (
-  ndmp2_tape_mtio_request *request2,
-  ndmp9_tape_mtio_request *request9)
+int ndmp_2to9_tape_mtio_request (void *vxbody, void *v9body)
 {
-	int		n_error = 0;
-	int		rc;
+  ndmp2_tape_mtio_request *request2 = (ndmp2_tape_mtio_request *) vxbody ;
+  ndmp9_tape_mtio_request *request9 = (ndmp9_tape_mtio_request *) v9body ;
 
-	rc = CNVT_E_TO_9 (request2, request9, tape_op, ndmp_29_tape_mtio_op);
-	if (rc == NDMP_INVALID_GENERAL) {
-		n_error++;
-		CNVT_TO_9(request2, request9, tape_op);
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	CNVT_TO_9(request2, request9, count);
+  rc = CNVT_E_TO_9(request2, request9, tape_op, ndmp_29_tape_mtio_op) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    n_error++ ;
+    CNVT_TO_9(request2, request9, tape_op) ;
+  }
 
-	return n_error;
+  CNVT_TO_9(request2, request9, count) ;
+
+  return n_error ;
 }
 
-int
-ndmp_9to2_tape_mtio_request (
-  ndmp9_tape_mtio_request *request9,
-  ndmp2_tape_mtio_request *request2)
+int ndmp_9to2_tape_mtio_request (void *v9body, void *vxbody)
 {
-	int		n_error = 0;
-	int		rc;
+  ndmp9_tape_mtio_request *request9 = (ndmp9_tape_mtio_request *) v9body ;
+  ndmp2_tape_mtio_request *request2 = (ndmp2_tape_mtio_request *) vxbody ;
 
-	rc = CNVT_E_FROM_9 (request2, request9, tape_op, ndmp_29_tape_mtio_op);
-	if (rc == NDMP_INVALID_GENERAL) {
-		n_error++;
-		CNVT_FROM_9(request2, request9, tape_op);
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	CNVT_FROM_9(request2, request9, count);
+  rc = CNVT_E_FROM_9(request2, request9, tape_op, ndmp_29_tape_mtio_op) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    n_error++ ;
+    CNVT_FROM_9(request2, request9, tape_op) ;
+  }
 
-	return n_error;
+  CNVT_FROM_9(request2, request9, count) ;
+
+  return n_error ;
 }
 
-int
-ndmp_2to9_tape_mtio_reply (
-  ndmp2_tape_mtio_reply *reply2,
-  ndmp9_tape_mtio_reply *reply9)
+
+
+int ndmp_2to9_tape_mtio_reply (void *vxbody, void *v9body)
 {
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_TO_9 (reply2, reply9, resid_count);
-	return 0;
+  ndmp2_tape_mtio_reply *reply2 = (ndmp2_tape_mtio_reply *) vxbody ;
+  ndmp9_tape_mtio_reply *reply9 = (ndmp9_tape_mtio_reply *) v9body ;
+
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_TO_9(reply2, reply9, resid_count) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_tape_mtio_reply (
-  ndmp9_tape_mtio_reply *reply9,
-  ndmp2_tape_mtio_reply *reply2)
+int ndmp_9to2_tape_mtio_reply (void *v9body, void *vxbody)
 {
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_FROM_9 (reply2, reply9, resid_count);
-	return 0;
+  ndmp9_tape_mtio_reply *reply9 = (ndmp9_tape_mtio_reply *) v9body ;
+  ndmp2_tape_mtio_reply *reply2 = (ndmp2_tape_mtio_reply *) vxbody ;
+
+  CNVT_E_FROM_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_FROM_9(reply2, reply9, resid_count) ;
+
+  return 0 ;
 }
+
+
 
 
 /*
  * ndmp_tape_write
  */
 
-int
-ndmp_2to9_tape_write_request (
-  ndmp2_tape_write_request *request2,
-  ndmp9_tape_write_request *request9)
+int ndmp_2to9_tape_write_request (void *vxbody, void *v9body)
 {
-	u_long		len;
-	char *		p;
+  ndmp2_tape_write_request *request2 = (ndmp2_tape_write_request *) vxbody ;
+  ndmp9_tape_write_request *request9 = (ndmp9_tape_write_request *) v9body ;
 
-	len = request2->data_out.data_out_len;
+  u_long len ;
+  char *p ;
 
-	p = NDMOS_API_MALLOC (len);
-	if (!p) {
-		return -1;
-	}
+  len = request2->data_out.data_out_len ;
 
-	NDMOS_API_BCOPY (request2->data_out.data_out_val, p, len);
+  p = NDMOS_API_MALLOC(len) ;
+  if (!p) { return -1 ; }
 
-	request9->data_out.data_out_val = p;
-	request9->data_out.data_out_len = len;
+  NDMOS_API_BCOPY(request2->data_out.data_out_val, p, len) ;
 
-	return 0;
+  request9->data_out.data_out_val = p ;
+  request9->data_out.data_out_len = len ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_tape_write_request (
-  ndmp9_tape_write_request *request9,
-  ndmp2_tape_write_request *request2)
+int ndmp_9to2_tape_write_request (void *v9body, void *vxbody)
 {
-	u_long		len;
-	char *		p;
+  ndmp9_tape_write_request *request9 = (ndmp9_tape_write_request *) v9body ;
+  ndmp2_tape_write_request *request2 = (ndmp2_tape_write_request *) vxbody ;
 
-	len = request9->data_out.data_out_len;
+  u_long len ;
+  char *p ;
 
-	p = NDMOS_API_MALLOC (len);
-	if (!p) {
-		return -1;
-	}
+  len = request9->data_out.data_out_len ;
 
-	NDMOS_API_BCOPY (request9->data_out.data_out_val, p, len);
+  p = NDMOS_API_MALLOC(len) ;
+  if (!p) { return -1 ; }
 
-	request2->data_out.data_out_val = p;
-	request2->data_out.data_out_len = len;
+  NDMOS_API_BCOPY(request9->data_out.data_out_val, p, len) ;
 
-	return 0;
+  request2->data_out.data_out_val = p ;
+  request2->data_out.data_out_len = len ;
+
+  return 0 ;
 }
 
-int
-ndmp_2to9_tape_write_reply (
-  ndmp2_tape_write_reply *reply2,
-  ndmp9_tape_write_reply *reply9)
+
+int ndmp_2to9_tape_write_reply (void *vxbody, void *v9body)
 {
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_TO_9 (reply2, reply9, count);
-	return 0;
+  ndmp2_tape_write_reply *reply2 = (ndmp2_tape_write_reply *) vxbody ;
+  ndmp9_tape_write_reply *reply9 = (ndmp9_tape_write_reply *) v9body ;
+
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_TO_9(reply2, reply9, count) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_tape_write_reply (
-  ndmp9_tape_write_reply *reply9,
-  ndmp2_tape_write_reply *reply2)
+int ndmp_9to2_tape_write_reply (void *v9body, void *vxbody)
 {
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_FROM_9 (reply2, reply9, count);
-	return 0;
+  ndmp9_tape_write_reply *reply9 = (ndmp9_tape_write_reply *) v9body ;
+  ndmp2_tape_write_reply *reply2 = (ndmp2_tape_write_reply *) vxbody ;
+
+  CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error) ;
+  CNVT_FROM_9 (reply2, reply9, count) ;
+
+  return 0 ;
 }
 
 
@@ -1379,79 +1396,80 @@ ndmp_9to2_tape_write_reply (
  * ndmp_tape_read
  */
 
-int
-ndmp_2to9_tape_read_request (
-  ndmp2_tape_read_request *request2,
-  ndmp9_tape_read_request *request9)
+int ndmp_2to9_tape_read_request (void *vxbody, void *v9body)
 {
-	CNVT_TO_9 (request2, request9, count);
-	return 0;
+  ndmp2_tape_read_request *request2 = (ndmp2_tape_read_request *) vxbody ;
+  ndmp9_tape_read_request *request9 = (ndmp9_tape_read_request *) v9body ;
+
+  CNVT_TO_9(request2, request9, count) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_tape_read_request (
-  ndmp9_tape_read_request *request9,
-  ndmp2_tape_read_request *request2)
+int ndmp_9to2_tape_read_request (void *v9body, void *vxbody)
 {
-	CNVT_FROM_9 (request2, request9, count);
-	return 0;
+  ndmp9_tape_read_request *request9 = (ndmp9_tape_read_request *) v9body ;
+  ndmp2_tape_read_request *request2 = (ndmp2_tape_read_request *) vxbody ;
+
+  CNVT_FROM_9(request2, request9, count) ;
+
+  return 0 ;
 }
 
-int
-ndmp_2to9_tape_read_reply (
-  ndmp2_tape_read_reply *reply2,
-  ndmp9_tape_read_reply *reply9)
+
+int ndmp_2to9_tape_read_reply (void *vxbody, void *v9body)
 {
-	u_long		len;
-	char *		p;
+  ndmp2_tape_read_reply *reply2 = (ndmp2_tape_read_reply *) vxbody ;
+  ndmp9_tape_read_reply *reply9 = (ndmp9_tape_read_reply *) v9body ;
 
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
+  u_long len ;
+  char *p ;
 
-	len = reply2->data_in.data_in_len;
-	if (len > 0) {
-		p = NDMOS_API_MALLOC (len);
-		if (!p) {
-			return -1;
-		}
-		NDMOS_API_BCOPY (reply2->data_in.data_in_val, p, len);
-	} else {
-		p = 0;
-		len = 0;
-	}
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
 
-	reply9->data_in.data_in_len = len;
-	reply9->data_in.data_in_val = p;
+  len = reply2->data_in.data_in_len ;
+  if (len > 0) {
+    p = NDMOS_API_MALLOC(len) ;
+    if (!p) { return -1 ; }
+    NDMOS_API_BCOPY(reply2->data_in.data_in_val, p, len) ;
+  } else {
+    p = 0 ;
+    len = 0 ;
+  }
 
-	return 0;
+  reply9->data_in.data_in_len = len ;
+  reply9->data_in.data_in_val = p ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_tape_read_reply (
-  ndmp9_tape_read_reply *reply9,
-  ndmp2_tape_read_reply *reply2)
+int ndmp_9to2_tape_read_reply (void *v9body, void *vxbody)
 {
-	u_long		len;
-	char *		p;
+  ndmp9_tape_read_reply *reply9 = (ndmp9_tape_read_reply *) v9body ;
+  ndmp2_tape_read_reply *reply2 = (ndmp2_tape_read_reply *) vxbody ;
 
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
+  u_long len ;
+  char *p ;
 
-	len = reply9->data_in.data_in_len;
-	if (len > 0) {
-		p = NDMOS_API_MALLOC (len);
-		if (!p) {
-			return -1;
-		}
-		NDMOS_API_BCOPY (reply9->data_in.data_in_val, p, len);
-	} else {
-		p = 0;
-		len = 0;
-	}
+  CNVT_E_FROM_9(reply2, reply9, error, ndmp_29_error) ;
 
-	reply2->data_in.data_in_len = len;
-	reply2->data_in.data_in_val = p;
+  len = reply9->data_in.data_in_len ;
+  if (len > 0) {
+    p = NDMOS_API_MALLOC(len) ;
+    if (!p) { return -1 ; }
+    NDMOS_API_BCOPY(reply9->data_in.data_in_val, p, len) ;
+  } else {
+    p = 0 ;
+    len = 0 ;
+  }
 
-	return 0;
+  reply2->data_in.data_in_len = len ;
+  reply2->data_in.data_in_val = p ;
+
+  return 0 ;
 }
+
+
 
 /*
  * ndmp_tape_execute_cdb
@@ -1512,48 +1530,50 @@ struct enum_conversion	ndmp_29_mover_halt_reason[] = {
 };
 
 
-int
-ndmp_2to9_mover_get_state_reply (
-  ndmp2_mover_get_state_reply *reply2,
-  ndmp9_mover_get_state_reply *reply9)
+int ndmp_2to9_mover_get_state_reply (void *vxbody, void *v9body)
 {
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_E_TO_9 (reply2, reply9, state, ndmp_29_mover_state);
-	CNVT_E_TO_9 (reply2, reply9, pause_reason, ndmp_29_mover_pause_reason);
-	CNVT_E_TO_9 (reply2, reply9, halt_reason, ndmp_29_mover_halt_reason);
+  ndmp2_mover_get_state_reply *reply2 =
+      (ndmp2_mover_get_state_reply *) vxbody ;
+  ndmp9_mover_get_state_reply *reply9 =
+      (ndmp9_mover_get_state_reply *) v9body ;
 
-	CNVT_TO_9 (reply2, reply9, record_size);
-	CNVT_TO_9 (reply2, reply9, record_num);
-	CNVT_TO_9x (reply2, reply9, data_written, bytes_moved);
-	CNVT_TO_9 (reply2, reply9, seek_position);
-	CNVT_TO_9 (reply2, reply9, bytes_left_to_read);
-	CNVT_TO_9 (reply2, reply9, window_offset);
-	CNVT_TO_9 (reply2, reply9, window_length);
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_E_TO_9(reply2, reply9, state, ndmp_29_mover_state) ;
+  CNVT_E_TO_9(reply2, reply9, pause_reason, ndmp_29_mover_pause_reason) ;
+  CNVT_E_TO_9(reply2, reply9, halt_reason, ndmp_29_mover_halt_reason) ;
 
-	return 0;
+  CNVT_TO_9(reply2, reply9, record_size) ;
+  CNVT_TO_9(reply2, reply9, record_num) ;
+  CNVT_TO_9x(reply2, reply9, data_written, bytes_moved) ;
+  CNVT_TO_9(reply2, reply9, seek_position) ;
+  CNVT_TO_9(reply2, reply9, bytes_left_to_read) ;
+  CNVT_TO_9(reply2, reply9, window_offset) ;
+  CNVT_TO_9(reply2, reply9, window_length) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_mover_get_state_reply (
-  ndmp9_mover_get_state_reply *reply9,
-  ndmp2_mover_get_state_reply *reply2)
+int ndmp_9to2_mover_get_state_reply (void *v9body, void *vxbody)
 {
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_E_FROM_9 (reply2, reply9, state, ndmp_29_mover_state);
-	CNVT_E_FROM_9 (reply2, reply9, pause_reason,
-						ndmp_29_mover_pause_reason);
-	CNVT_E_FROM_9 (reply2, reply9, halt_reason,
-						ndmp_29_mover_halt_reason);
+  ndmp9_mover_get_state_reply *reply9 =
+      (ndmp9_mover_get_state_reply *) v9body ;
+  ndmp2_mover_get_state_reply *reply2 =
+      (ndmp2_mover_get_state_reply *) vxbody ;
 
-	CNVT_FROM_9 (reply2, reply9, record_size);
-	CNVT_FROM_9 (reply2, reply9, record_num);
-	CNVT_FROM_9x (reply2, reply9, data_written, bytes_moved);
-	CNVT_FROM_9 (reply2, reply9, seek_position);
-	CNVT_FROM_9 (reply2, reply9, bytes_left_to_read);
-	CNVT_FROM_9 (reply2, reply9, window_offset);
-	CNVT_FROM_9 (reply2, reply9, window_length);
+  CNVT_E_FROM_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_E_FROM_9(reply2, reply9, state, ndmp_29_mover_state) ;
+  CNVT_E_FROM_9(reply2, reply9, pause_reason, ndmp_29_mover_pause_reason) ;
+  CNVT_E_FROM_9(reply2, reply9, halt_reason, ndmp_29_mover_halt_reason) ;
 
-	return 0;
+  CNVT_FROM_9(reply2, reply9, record_size) ;
+  CNVT_FROM_9(reply2, reply9, record_num) ;
+  CNVT_FROM_9x(reply2, reply9, data_written, bytes_moved) ;
+  CNVT_FROM_9(reply2, reply9, seek_position) ;
+  CNVT_FROM_9(reply2, reply9, bytes_left_to_read) ;
+  CNVT_FROM_9(reply2, reply9, window_offset) ;
+  CNVT_FROM_9(reply2, reply9, window_length) ;
+
+  return 0 ;
 }
 
 
@@ -1561,74 +1581,78 @@ ndmp_9to2_mover_get_state_reply (
  * ndmp_mover_listen
  */
 
-int
-ndmp_2to9_mover_listen_request (
-  ndmp2_mover_listen_request *request2,
-  ndmp9_mover_listen_request *request9)
+
+int ndmp_2to9_mover_listen_request (void *vxbody, void *v9body)
 {
-	int		rc;
+  ndmp2_mover_listen_request *request2 =
+      (ndmp2_mover_listen_request *) vxbody ;
+  ndmp9_mover_listen_request *request9 =
+      (ndmp9_mover_listen_request *) v9body ;
 
-	rc = CNVT_E_TO_9 (request2, request9, mode, ndmp_29_mover_mode);
-	if (rc == NDMP_INVALID_GENERAL) {
-		 CNVT_TO_9 (request2, request9, mode);
-	}
-	rc = CNVT_E_TO_9 (request2, request9, addr_type,
-					ndmp_29_mover_addr_type);
-	if (rc == NDMP_INVALID_GENERAL) {
-		 CNVT_TO_9 (request2, request9, addr_type);
-	}
+  int rc;
 
-	return 0;
+  rc = CNVT_E_TO_9(request2, request9, mode, ndmp_29_mover_mode) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_TO_9 (request2, request9, mode) ;
+  }
+  rc = CNVT_E_TO_9(request2, request9, addr_type, ndmp_29_mover_addr_type) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_TO_9(request2, request9, addr_type) ;
+  }
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_mover_listen_request (
-  ndmp9_mover_listen_request *request9,
-  ndmp2_mover_listen_request *request2)
+int ndmp_9to2_mover_listen_request (void *v9body, void *vxbody)
 {
-	int		rc;
+  ndmp9_mover_listen_request *request9 =
+      (ndmp9_mover_listen_request *) v9body ;
+  ndmp2_mover_listen_request *request2 =
+      (ndmp2_mover_listen_request *) vxbody ;
 
-	rc = CNVT_E_FROM_9 (request2, request9, mode, ndmp_29_mover_mode);
-	if (rc == NDMP_INVALID_GENERAL) {
-		 CNVT_FROM_9 (request2, request9, mode);
-	}
-	rc = CNVT_E_FROM_9 (request2, request9, addr_type,
-					ndmp_29_mover_addr_type);
-	if (rc == NDMP_INVALID_GENERAL) {
-		 CNVT_FROM_9 (request2, request9, addr_type);
-	}
+  int rc;
 
-	return 0;
+  rc = CNVT_E_FROM_9(request2, request9, mode, ndmp_29_mover_mode) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_FROM_9(request2, request9, mode) ;
+  }
+  rc = CNVT_E_FROM_9(request2, request9, addr_type, ndmp_29_mover_addr_type) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_FROM_9(request2, request9, addr_type) ;
+  }
+
+  return 0 ;
 }
 
-int
-ndmp_2to9_mover_listen_reply (
-  ndmp2_mover_listen_reply *reply2,
-  ndmp9_mover_listen_reply *reply9)
+
+int ndmp_2to9_mover_listen_reply (void *vxbody, void *v9body)
 {
-	int		n_error = 0;
+  ndmp2_mover_listen_reply *reply2 = (ndmp2_mover_listen_reply *) vxbody ;
+  ndmp9_mover_listen_reply *reply9 = (ndmp9_mover_listen_reply *) v9body ;
 
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
+  int n_error = 0 ;
 
-	n_error += ndmp_2to9_mover_addr (&reply2->mover,
-			&reply9->data_connection_addr);
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
 
-	return n_error;
+  n_error += ndmp_2to9_mover_addr (&reply2->mover,
+		  &reply9->data_connection_addr) ;
+
+  return n_error ;
 }
 
-int
-ndmp_9to2_mover_listen_reply (
-  ndmp9_mover_listen_reply *reply9,
-  ndmp2_mover_listen_reply *reply2)
+int ndmp_9to2_mover_listen_reply (void *v9body, void *vxbody)
 {
-	int		n_error = 0;
+  ndmp9_mover_listen_reply *reply9 = (ndmp9_mover_listen_reply *) v9body ;
+  ndmp2_mover_listen_reply *reply2 = (ndmp2_mover_listen_reply *) vxbody ;
 
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
+  int n_error = 0 ;
 
-	n_error += ndmp_9to2_mover_addr (&reply9->data_connection_addr,
-			&reply2->mover);
+  CNVT_E_FROM_9(reply2, reply9, error, ndmp_29_error) ;
 
-	return n_error;
+  n_error += ndmp_9to2_mover_addr (&reply9->data_connection_addr,
+		  &reply2->mover) ;
+
+  return n_error ;
 }
 
 /*
@@ -1651,24 +1675,29 @@ ndmp_9to2_mover_listen_reply (
  * just error reply
  */
 
-int
-ndmp_2to9_mover_set_window_request (
-  ndmp2_mover_set_window_request *request2,
-  ndmp9_mover_set_window_request *request9)
-{
-	CNVT_TO_9 (request2, request9, offset);
-	CNVT_TO_9 (request2, request9, length);
-	return 0;
+
+int ndmp_2to9_mover_set_window_request (void *vxbody, void *v9body)
+{ ndmp2_mover_set_window_request *request2 =
+      (ndmp2_mover_set_window_request *) vxbody ;
+  ndmp9_mover_set_window_request *request9 =
+      (ndmp9_mover_set_window_request *) v9body ;
+
+  CNVT_TO_9 (request2, request9, offset) ;
+  CNVT_TO_9 (request2, request9, length) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_mover_set_window_request (
-  ndmp9_mover_set_window_request *request9,
-  ndmp2_mover_set_window_request *request2)
-{
-	CNVT_FROM_9 (request2, request9, offset);
-	CNVT_FROM_9 (request2, request9, length);
-	return 0;
+int ndmp_9to2_mover_set_window_request (void *v9body, void *vxbody)
+{ ndmp9_mover_set_window_request *request9 =
+      (ndmp9_mover_set_window_request *) v9body ;
+  ndmp2_mover_set_window_request *request2 =
+      (ndmp2_mover_set_window_request *) vxbody ;
+
+  CNVT_FROM_9 (request2, request9, offset) ;
+  CNVT_FROM_9 (request2, request9, length) ;
+
+  return 0 ;
 }
 
 
@@ -1677,24 +1706,25 @@ ndmp_9to2_mover_set_window_request (
  * just error reply
  */
 
-int
-ndmp_2to9_mover_read_request (
-  ndmp2_mover_read_request *request2,
-  ndmp9_mover_read_request *request9)
+int ndmp_2to9_mover_read_request (void *vxbody, void *v9body)
 {
-	CNVT_TO_9 (request2, request9, offset);
-	CNVT_TO_9 (request2, request9, length);
-	return 0;
+  ndmp2_mover_read_request *request2 = (ndmp2_mover_read_request *) vxbody ;
+  ndmp9_mover_read_request *request9 = (ndmp9_mover_read_request *) v9body ;
+
+  CNVT_TO_9 (request2, request9, offset) ;
+  CNVT_TO_9 (request2, request9, length) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_mover_read_request (
-  ndmp9_mover_read_request *request9,
-  ndmp2_mover_read_request *request2)
-{
-	CNVT_FROM_9 (request2, request9, offset);
-	CNVT_FROM_9 (request2, request9, length);
-	return 0;
+int ndmp_9to2_mover_read_request (void *v9body, void *vxbody)
+{ ndmp9_mover_read_request *request9 = (ndmp9_mover_read_request *) v9body ;
+  ndmp2_mover_read_request *request2 = (ndmp2_mover_read_request *) vxbody ;
+
+  CNVT_FROM_9 (request2, request9, offset) ;
+  CNVT_FROM_9 (request2, request9, length) ;
+
+  return 0 ;
 }
 
 /*
@@ -1708,26 +1738,29 @@ ndmp_9to2_mover_read_request (
  * just error reply
  */
 
-int
-ndmp_2to9_mover_set_record_size_request (
-  ndmp2_mover_set_record_size_request *request2,
-  ndmp9_mover_set_record_size_request *request9)
+int ndmp_2to9_mover_set_record_size_request (void *vxbody, void *v9body)
 {
-	CNVT_TO_9x (request2, request9, len, record_size);
-	return 0;
+  ndmp2_mover_set_record_size_request *request2 =
+      (ndmp2_mover_set_record_size_request *) vxbody ;
+  ndmp9_mover_set_record_size_request *request9 =
+      (ndmp9_mover_set_record_size_request *) v9body ;
+
+  CNVT_TO_9x (request2, request9, len, record_size) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_mover_set_record_size_request (
-  ndmp9_mover_set_record_size_request *request9,
-  ndmp2_mover_set_record_size_request *request2)
+int ndmp_9to2_mover_set_record_size_request (void *v9body, void *vxbody)
 {
-	CNVT_FROM_9x (request2, request9, len, record_size);
-	return 0;
+  ndmp9_mover_set_record_size_request *request9 =
+      (ndmp9_mover_set_record_size_request *) v9body ;
+  ndmp2_mover_set_record_size_request *request2 =
+      (ndmp2_mover_set_record_size_request *) vxbody ;
+
+  CNVT_FROM_9x (request2, request9, len, record_size) ;
+
+  return 0 ;
 }
-
-
-
 
 
 /*
@@ -1869,96 +1902,103 @@ struct enum_conversion	ndmp_29_data_halt_reason[] = {
 };
 
 
-int
-ndmp_2to9_data_get_state_reply (
-  ndmp2_data_get_state_reply *reply2,
-  ndmp9_data_get_state_reply *reply9)
+int ndmp_2to9_data_get_state_reply (void *vxbody, void *v9body)
 {
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_E_TO_9 (reply2, reply9, operation, ndmp_29_data_operation);
-	CNVT_E_TO_9 (reply2, reply9, state, ndmp_29_data_state);
-	CNVT_E_TO_9 (reply2, reply9, halt_reason, ndmp_29_data_halt_reason);
+  ndmp2_data_get_state_reply *reply2 = (ndmp2_data_get_state_reply *) vxbody ;
+  ndmp9_data_get_state_reply *reply9 = (ndmp9_data_get_state_reply *) v9body ;
 
-	CNVT_TO_9 (reply2, reply9, bytes_processed);
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_E_TO_9(reply2, reply9, operation, ndmp_29_data_operation) ;
+  CNVT_E_TO_9(reply2, reply9, state, ndmp_29_data_state) ;
+  CNVT_E_TO_9(reply2, reply9, halt_reason, ndmp_29_data_halt_reason) ;
 
-	CNVT_VUQ_TO_9 (reply2, reply9, est_bytes_remain);
-	CNVT_VUL_TO_9 (reply2, reply9, est_time_remain);
+  CNVT_TO_9(reply2, reply9, bytes_processed) ;
 
-	ndmp_2to9_mover_addr (&reply2->mover, &reply9->data_connection_addr);
+  CNVT_VUQ_TO_9(reply2, reply9, est_bytes_remain) ;
+  CNVT_VUL_TO_9(reply2, reply9, est_time_remain) ;
 
-	CNVT_TO_9 (reply2, reply9, read_offset);
-	CNVT_TO_9 (reply2, reply9, read_length);
+  ndmp_2to9_mover_addr(&reply2->mover, &reply9->data_connection_addr) ;
 
-	return 0;
+  CNVT_TO_9(reply2, reply9, read_offset) ;
+  CNVT_TO_9(reply2, reply9, read_length) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_data_get_state_reply (
-  ndmp9_data_get_state_reply *reply9,
-  ndmp2_data_get_state_reply *reply2)
+int ndmp_9to2_data_get_state_reply (void *v9body, void *vxbody)
 {
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
-	CNVT_E_FROM_9 (reply2, reply9, operation, ndmp_29_data_operation);
-	CNVT_E_FROM_9 (reply2, reply9, state, ndmp_29_data_state);
-	CNVT_E_FROM_9 (reply2, reply9, halt_reason, ndmp_29_data_halt_reason);
+  ndmp9_data_get_state_reply *reply9 = (ndmp9_data_get_state_reply *) v9body ;
+  ndmp2_data_get_state_reply *reply2 = (ndmp2_data_get_state_reply *) vxbody ;
 
-	CNVT_FROM_9 (reply2, reply9, bytes_processed);
+  CNVT_E_FROM_9(reply2, reply9, error, ndmp_29_error) ;
+  CNVT_E_FROM_9(reply2, reply9, operation, ndmp_29_data_operation) ;
+  CNVT_E_FROM_9(reply2, reply9, state, ndmp_29_data_state) ;
+  CNVT_E_FROM_9(reply2, reply9, halt_reason, ndmp_29_data_halt_reason) ;
 
-	CNVT_VUQ_FROM_9 (reply2, reply9, est_bytes_remain);
-	CNVT_VUL_FROM_9 (reply2, reply9, est_time_remain);
+  CNVT_FROM_9(reply2, reply9, bytes_processed) ;
 
-	ndmp_9to2_mover_addr (&reply9->data_connection_addr, &reply2->mover);
+  CNVT_VUQ_FROM_9(reply2, reply9, est_bytes_remain) ;
+  CNVT_VUL_FROM_9(reply2, reply9, est_time_remain) ;
 
-	CNVT_FROM_9 (reply2, reply9, read_offset);
-	CNVT_FROM_9 (reply2, reply9, read_length);
+  ndmp_9to2_mover_addr(&reply9->data_connection_addr, &reply2->mover) ;
 
-	return 0;
+  CNVT_FROM_9(reply2, reply9, read_offset) ;
+  CNVT_FROM_9(reply2, reply9, read_length) ;
+
+  return 0 ;
 }
+
+
 
 /*
  * ndmp_data_start_backup
  * just error reply
  */
 
-int
-ndmp_2to9_data_start_backup_request (
-  ndmp2_data_start_backup_request *request2,
-  ndmp9_data_start_backup_request *request9)
+int ndmp_2to9_data_start_backup_request (void *vxbody, void *v9body)
 {
-	int		n_error = 0;
+  ndmp2_data_start_backup_request *request2 =
+      (ndmp2_data_start_backup_request *) vxbody ;
+  ndmp9_data_start_backup_request *request9 =
+      (ndmp9_data_start_backup_request *) v9body ;
 
-	CNVT_STRDUP_TO_9 (request2, request9, bu_type);
+  int n_error = 0 ;
 
-	ndmp_2to9_pval_vec_dup (request2->env.env_val,
-				&request9->env.env_val,
-				request2->env.env_len);
+  CNVT_STRDUP_TO_9(request2, request9, bu_type) ;
 
-	request9->env.env_len = request2->env.env_len;
+  ndmp_2to9_pval_vec_dup(request2->env.env_val,
+			 &request9->env.env_val,
+			 request2->env.env_len) ;
 
-	n_error += ndmp_2to9_mover_addr (&request2->mover, &request9->addr);
+  request9->env.env_len = request2->env.env_len ;
 
-	return n_error;
+  n_error += ndmp_2to9_mover_addr(&request2->mover, &request9->addr) ;
+
+  return n_error ;
 }
 
-int
-ndmp_9to2_data_start_backup_request (
-  ndmp9_data_start_backup_request *request9,
-  ndmp2_data_start_backup_request *request2)
+int ndmp_9to2_data_start_backup_request (void *v9body, void *vxbody)
 {
-	int		n_error = 0;
+  ndmp9_data_start_backup_request *request9 =
+      (ndmp9_data_start_backup_request *) v9body ;
+  ndmp2_data_start_backup_request *request2 =
+      (ndmp2_data_start_backup_request *) vxbody ;
 
-	CNVT_STRDUP_FROM_9 (request2, request9, bu_type);
+  int n_error = 0 ;
 
-	ndmp_9to2_pval_vec_dup (request9->env.env_val,
-				&request2->env.env_val,
-				request9->env.env_len);
+  CNVT_STRDUP_FROM_9(request2, request9, bu_type) ;
 
-	request2->env.env_len = request9->env.env_len;
+  ndmp_9to2_pval_vec_dup(request9->env.env_val,
+			 &request2->env.env_val,
+			 request9->env.env_len) ;
 
-	n_error += ndmp_9to2_mover_addr (&request9->addr, &request2->mover);
+  request2->env.env_len = request9->env.env_len ;
 
-	return n_error;
+  n_error += ndmp_9to2_mover_addr(&request9->addr, &request2->mover) ;
+
+  return n_error ;
 }
+
 
 
 /*
@@ -1967,56 +2007,60 @@ ndmp_9to2_data_start_backup_request (
  * just error reply
  */
 
-int
-ndmp_2to9_data_start_recover_request (
-  ndmp2_data_start_recover_request *request2,
-  ndmp9_data_start_recover_request *request9)
+int ndmp_2to9_data_start_recover_request (void *vxbody, void *v9body)
 {
-	int		n_error = 0;
+  ndmp2_data_start_recover_request *request2 =
+      (ndmp2_data_start_recover_request *) vxbody ;
+  ndmp9_data_start_recover_request *request9 =
+      (ndmp9_data_start_recover_request *) v9body ;
 
-	CNVT_STRDUP_TO_9 (request2, request9, bu_type);
+  int n_error = 0 ;
 
-	ndmp_2to9_pval_vec_dup (request2->env.env_val,
-				&request9->env.env_val,
-				request2->env.env_len);
+  CNVT_STRDUP_TO_9(request2, request9, bu_type) ;
 
-	request9->env.env_len = request2->env.env_len;
+  ndmp_2to9_pval_vec_dup(request2->env.env_val,
+			 &request9->env.env_val,
+			 request2->env.env_len) ;
 
-	ndmp_2to9_name_vec_dup (request2->nlist.nlist_val,
-				&request9->nlist.nlist_val,
-				request2->nlist.nlist_len);
+  request9->env.env_len = request2->env.env_len ;
 
-	request9->nlist.nlist_len = request2->nlist.nlist_len;
+  ndmp_2to9_name_vec_dup(request2->nlist.nlist_val,
+			 &request9->nlist.nlist_val,
+			 request2->nlist.nlist_len) ;
 
-	n_error += ndmp_2to9_mover_addr (&request2->mover, &request9->addr);
+  request9->nlist.nlist_len = request2->nlist.nlist_len ;
 
-	return n_error;
+  n_error += ndmp_2to9_mover_addr (&request2->mover, &request9->addr) ;
+
+  return n_error ;
 }
 
-int
-ndmp_9to2_data_start_recover_request (
-  ndmp9_data_start_recover_request *request9,
-  ndmp2_data_start_recover_request *request2)
+int ndmp_9to2_data_start_recover_request (void *v9body, void *vxbody)
 {
-	int		n_error = 0;
+  ndmp9_data_start_recover_request *request9 =
+      (ndmp9_data_start_recover_request *) v9body ;
+  ndmp2_data_start_recover_request *request2 =
+      (ndmp2_data_start_recover_request *) vxbody ;
 
-	CNVT_STRDUP_FROM_9 (request2, request9, bu_type);
+  int n_error = 0 ;
 
-	ndmp_9to2_pval_vec_dup (request9->env.env_val,
-				&request2->env.env_val,
-				request9->env.env_len);
+  CNVT_STRDUP_FROM_9(request2, request9, bu_type) ;
 
-	request2->env.env_len = request9->env.env_len;
+  ndmp_9to2_pval_vec_dup(request9->env.env_val,
+			 &request2->env.env_val,
+			 request9->env.env_len) ;
 
-	ndmp_9to2_name_vec_dup (request9->nlist.nlist_val,
-				&request2->nlist.nlist_val,
-				request9->nlist.nlist_len);
+  request2->env.env_len = request9->env.env_len ;
 
-	request2->nlist.nlist_len = request9->nlist.nlist_len;
+  ndmp_9to2_name_vec_dup(request9->nlist.nlist_val,
+			 &request2->nlist.nlist_val,
+			 request9->nlist.nlist_len) ;
 
-	n_error += ndmp_9to2_mover_addr (&request9->addr, &request2->mover);
+  request2->nlist.nlist_len = request9->nlist.nlist_len ;
 
-	return n_error;
+  n_error += ndmp_9to2_mover_addr(&request9->addr, &request2->mover) ;
+
+  return n_error ;
 }
 
 
@@ -2030,38 +2074,37 @@ ndmp_9to2_data_start_recover_request (
  * no args request
  */
 
-int
-ndmp_2to9_data_get_env_reply (
-  ndmp2_data_get_env_reply *reply2,
-  ndmp9_data_get_env_reply *reply9)
+int ndmp_2to9_data_get_env_reply (void *vxbody, void *v9body)
 {
-	CNVT_E_TO_9 (reply2, reply9, error, ndmp_29_error);
+  ndmp2_data_get_env_reply *reply2 = (ndmp2_data_get_env_reply *) vxbody ;
+  ndmp9_data_get_env_reply *reply9 = (ndmp9_data_get_env_reply *) v9body ;
 
-	ndmp_2to9_pval_vec_dup (reply2->env.env_val,
-				&reply9->env.env_val,
-				reply2->env.env_len);
+  CNVT_E_TO_9(reply2, reply9, error, ndmp_29_error) ;
 
-	reply9->env.env_len = reply2->env.env_len;
+  ndmp_2to9_pval_vec_dup(reply2->env.env_val,
+			 &reply9->env.env_val,
+			 reply2->env.env_len) ;
 
-	return 0;
+  reply9->env.env_len = reply2->env.env_len ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_data_get_env_reply (
-  ndmp9_data_get_env_reply *reply9,
-  ndmp2_data_get_env_reply *reply2)
+int ndmp_9to2_data_get_env_reply (void *v9body, void *vxbody)
 {
-	CNVT_E_FROM_9 (reply2, reply9, error, ndmp_29_error);
+  ndmp9_data_get_env_reply *reply9 = (ndmp9_data_get_env_reply *) v9body ;
+  ndmp2_data_get_env_reply *reply2 = (ndmp2_data_get_env_reply *) vxbody ;
 
-	ndmp_9to2_pval_vec_dup (reply9->env.env_val,
-				&reply2->env.env_val,
-				reply9->env.env_len);
+  CNVT_E_FROM_9(reply2, reply9, error, ndmp_29_error) ;
 
-	reply2->env.env_len = reply9->env.env_len;
+  ndmp_9to2_pval_vec_dup(reply9->env.env_val,
+			 &reply2->env.env_val,
+			 reply9->env.env_len) ;
 
-	return 0;
+  reply2->env.env_len = reply9->env.env_len ;
+
+  return 0 ;
 }
-
 
 /*
  * ndmp_data_stop
@@ -2081,42 +2124,44 @@ ndmp_9to2_data_get_env_reply (
  * just error reply
  */
 
-int
-ndmp_2to9_notify_data_halted_request (
-  ndmp2_notify_data_halted_request *request2,
-  ndmp9_notify_data_halted_request *request9)
+int ndmp_2to9_notify_data_halted_request (void *vxbody, void *v9body)
 {
-	int		n_error = 0;
-	int		rc;
+  ndmp2_notify_data_halted_request *request2 =
+      (ndmp2_notify_data_halted_request *) vxbody ;
+  ndmp9_notify_data_halted_request *request9 =
+      (ndmp9_notify_data_halted_request *) v9body ;
 
-	rc = CNVT_E_TO_9 (request2, request9, reason,
-				ndmp_29_data_halt_reason);
-	if (rc == NDMP_INVALID_GENERAL) {
-		CNVT_TO_9 (request2, request9, reason);
-		n_error++;
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	return n_error;
+  rc = CNVT_E_TO_9(request2, request9, reason, ndmp_29_data_halt_reason) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_TO_9(request2, request9, reason) ;
+    n_error++ ;
+  }
+
+  return n_error ;
 }
 
-int
-ndmp_9to2_notify_data_halted_request (
-  ndmp9_notify_data_halted_request *request9,
-  ndmp2_notify_data_halted_request *request2)
+int ndmp_9to2_notify_data_halted_request (void *v9body, void *vxbody)
 {
-	int		n_error = 0;
-	int		rc;
+  ndmp9_notify_data_halted_request *request9 =
+      (ndmp9_notify_data_halted_request *) v9body ;
+  ndmp2_notify_data_halted_request *request2 =
+      (ndmp2_notify_data_halted_request *) vxbody ;
 
-	rc = CNVT_E_FROM_9 (request2, request9, reason,
-				ndmp_29_data_halt_reason);
-	if (rc == NDMP_INVALID_GENERAL) {
-		CNVT_FROM_9 (request2, request9, reason);
-		n_error++;
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	request2->text_reason = NDMOS_API_STRDUP("whatever");
+  rc = CNVT_E_FROM_9(request2, request9, reason, ndmp_29_data_halt_reason) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_FROM_9(request2, request9, reason) ;
+    n_error++ ;
+  }
 
-	return n_error;
+  request2->text_reason = NDMOS_API_STRDUP("whatever") ;
+
+  return n_error ;
 }
 
 
@@ -2134,46 +2179,50 @@ struct enum_conversion	ndmp_29_connect_reason[] = {
 	END_ENUM_CONVERSION_TABLE
 };
 
-int
-ndmp_2to9_notify_connected_request (
-  ndmp2_notify_connected_request *request2,
-  ndmp9_notify_connected_request *request9)
+int ndmp_2to9_notify_connected_request (void *vxbody, void *v9body)
 {
-	int		n_error = 0;
-	int		rc;
+  ndmp2_notify_connected_request *request2 =
+      (ndmp2_notify_connected_request *) vxbody ;
+  ndmp9_notify_connected_request *request9 =
+      (ndmp9_notify_connected_request *) v9body ;
 
-	rc = CNVT_E_TO_9 (request2, request9, reason, ndmp_29_connect_reason);
-	if (rc == NDMP_INVALID_GENERAL) {
-		CNVT_TO_9 (request2, request9, reason);
-		n_error++;
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	CNVT_TO_9 (request2, request9, protocol_version);
+  rc = CNVT_E_TO_9(request2, request9, reason, ndmp_29_connect_reason) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_TO_9(request2, request9, reason) ;
+    n_error++ ;
+  }
 
-	CNVT_STRDUP_TO_9 (request2, request9, text_reason);
+  CNVT_TO_9(request2, request9, protocol_version) ;
 
-	return n_error;
+  CNVT_STRDUP_TO_9(request2, request9, text_reason) ;
+
+  return n_error ;
 }
 
-int
-ndmp_9to2_notify_connected_request (
-  ndmp9_notify_connected_request *request9,
-  ndmp2_notify_connected_request *request2)
+int ndmp_9to2_notify_connected_request (void *v9body, void *vxbody)
 {
-	int		n_error = 0;
-	int		rc;
+  ndmp9_notify_connected_request *request9 =
+      (ndmp9_notify_connected_request *) v9body ;
+  ndmp2_notify_connected_request *request2 =
+      (ndmp2_notify_connected_request *) vxbody ;
 
-	rc = CNVT_E_FROM_9(request2, request9, reason, ndmp_29_connect_reason);
-	if (rc == NDMP_INVALID_GENERAL) {
-		CNVT_FROM_9 (request2, request9, reason);
-		n_error++;
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	CNVT_FROM_9 (request2, request9, protocol_version);
+  rc = CNVT_E_FROM_9(request2, request9, reason, ndmp_29_connect_reason) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_FROM_9 (request2, request9, reason) ;
+    n_error++ ;
+  }
 
-	CNVT_STRDUP_FROM_9 (request2, request9, text_reason);
+  CNVT_FROM_9(request2, request9, protocol_version) ;
 
-	return n_error;
+  CNVT_STRDUP_FROM_9(request2, request9, text_reason) ;
+
+  return n_error ;
 }
 
 
@@ -2182,89 +2231,93 @@ ndmp_9to2_notify_connected_request (
  * just error reply
  */
 
-int
-ndmp_2to9_notify_mover_halted_request (
-  ndmp2_notify_mover_halted_request *request2,
-  ndmp9_notify_mover_halted_request *request9)
+int ndmp_2to9_notify_mover_halted_request (void *vxbody, void *v9body)
 {
-	int		n_error = 0;
-	int		rc;
+  ndmp2_notify_mover_halted_request *request2 =
+      (ndmp2_notify_mover_halted_request *) vxbody ;
+  ndmp9_notify_mover_halted_request *request9 =
+      (ndmp9_notify_mover_halted_request *) v9body ;
 
-	rc = CNVT_E_TO_9 (request2, request9, reason,
-				ndmp_29_mover_halt_reason);
-	if (rc == NDMP_INVALID_GENERAL) {
-		CNVT_TO_9 (request2, request9, reason);
-		n_error++;
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	return n_error;
+  rc = CNVT_E_TO_9(request2, request9, reason, ndmp_29_mover_halt_reason) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_TO_9(request2, request9, reason) ;
+    n_error++ ;
+  }
+
+  return n_error ;
 }
 
-int
-ndmp_9to2_notify_mover_halted_request (
-  ndmp9_notify_mover_halted_request *request9,
-  ndmp2_notify_mover_halted_request *request2)
+int ndmp_9to2_notify_mover_halted_request (void *v9body, void *vxbody)
 {
-	int		n_error = 0;
-	int		rc;
+  ndmp9_notify_mover_halted_request *request9 =
+      (ndmp9_notify_mover_halted_request *) v9body ;
+  ndmp2_notify_mover_halted_request *request2 =
+      (ndmp2_notify_mover_halted_request *) vxbody ;
 
-	rc = CNVT_E_FROM_9 (request2, request9, reason,
-				ndmp_29_mover_halt_reason);
-	if (rc == NDMP_INVALID_GENERAL) {
-		CNVT_FROM_9 (request2, request9, reason);
-		n_error++;
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	request2->text_reason = NDMOS_API_STRDUP ("Whatever");
+  rc = CNVT_E_FROM_9(request2, request9, reason, ndmp_29_mover_halt_reason) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_FROM_9(request2, request9, reason) ;
+    n_error++ ;
+  }
 
-	return n_error;
+  request2->text_reason = NDMOS_API_STRDUP ("Whatever") ;
+
+  return n_error ;
 }
-
 
 /*
  * ndmp_notify_mover_paused
  * just error reply
  */
 
-int
-ndmp_2to9_notify_mover_paused_request (
-  ndmp2_notify_mover_paused_request *request2,
-  ndmp9_notify_mover_paused_request *request9)
+int ndmp_2to9_notify_mover_paused_request (void *vxbody, void *v9body)
 {
-	int		n_error = 0;
-	int		rc;
+  ndmp2_notify_mover_paused_request *request2 =
+      (ndmp2_notify_mover_paused_request *) vxbody ;
+  ndmp9_notify_mover_paused_request *request9 =
+      (ndmp9_notify_mover_paused_request *) v9body ;
 
-	rc = CNVT_E_TO_9 (request2, request9, reason,
-				ndmp_29_mover_pause_reason);
-	if (rc == NDMP_INVALID_GENERAL) {
-		CNVT_TO_9 (request2, request9, reason);
-		n_error++;
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	CNVT_TO_9 (request2, request9, seek_position);
+  rc = CNVT_E_TO_9(request2, request9, reason, ndmp_29_mover_pause_reason) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_TO_9(request2, request9, reason) ;
+    n_error++ ;
+  }
 
-	return n_error;
+  CNVT_TO_9(request2, request9, seek_position) ;
+
+  return n_error ;
 }
 
-int
-ndmp_9to2_notify_mover_paused_request (
-  ndmp9_notify_mover_paused_request *request9,
-  ndmp2_notify_mover_paused_request *request2)
+int ndmp_9to2_notify_mover_paused_request (void *v9body, void *vxbody)
 {
-	int		n_error = 0;
-	int		rc;
+  ndmp9_notify_mover_paused_request *request9 =
+      (ndmp9_notify_mover_paused_request *) v9body ;
+  ndmp2_notify_mover_paused_request *request2 =
+      (ndmp2_notify_mover_paused_request *) vxbody ;
 
-	rc = CNVT_E_FROM_9 (request2, request9, reason,
-				ndmp_29_mover_pause_reason);
-	if (rc == NDMP_INVALID_GENERAL) {
-		CNVT_FROM_9 (request2, request9, reason);
-		n_error++;
-	}
+  int n_error = 0 ;
+  int rc ;
 
-	CNVT_FROM_9 (request2, request9, seek_position);
+  rc = CNVT_E_FROM_9(request2, request9, reason, ndmp_29_mover_pause_reason) ;
+  if (rc == NDMP_INVALID_GENERAL) {
+    CNVT_FROM_9(request2, request9, reason) ;
+    n_error++ ;
+  }
 
-	return n_error;
+  CNVT_FROM_9(request2, request9, seek_position) ;
+
+  return n_error ;
 }
+
 
 
 /*
@@ -2272,27 +2325,31 @@ ndmp_9to2_notify_mover_paused_request (
  * just error reply
  */
 
-int
-ndmp_2to9_notify_data_read_request (
-  ndmp2_notify_data_read_request *request2,
-  ndmp9_notify_data_read_request *request9)
+int ndmp_2to9_notify_data_read_request (void *vxbody, void *v9body)
 {
-	CNVT_TO_9 (request2, request9, offset);
-	CNVT_TO_9 (request2, request9, length);
-	return 0;
+  ndmp2_notify_data_read_request *request2 =
+      (ndmp2_notify_data_read_request *) vxbody ;
+  ndmp9_notify_data_read_request *request9 =
+      (ndmp9_notify_data_read_request *) v9body ;
+
+  CNVT_TO_9(request2, request9, offset) ;
+  CNVT_TO_9(request2, request9, length) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_notify_data_read_request (
-  ndmp9_notify_data_read_request *request9,
-  ndmp2_notify_data_read_request *request2)
+int ndmp_9to2_notify_data_read_request (void *v9body, void *vxbody)
 {
-	CNVT_FROM_9 (request2, request9, offset);
-	CNVT_FROM_9 (request2, request9, length);
-	return 0;
+  ndmp9_notify_data_read_request *request9 =
+      (ndmp9_notify_data_read_request *) v9body ;
+  ndmp2_notify_data_read_request *request2 =
+      (ndmp2_notify_data_read_request *) vxbody ;
+
+  CNVT_FROM_9(request2, request9, offset) ;
+  CNVT_FROM_9(request2, request9, length) ;
+
+  return 0 ;
 }
-
-
 
 
 /*
@@ -2329,29 +2386,29 @@ struct enum_conversion	ndmp_29_recovery_status[] = {
 };
 
 
-int
-ndmp_2to9_log_file_request (
-  ndmp2_log_file_request *request2,
-  ndmp9_log_file_request *request9)
+int ndmp_2to9_log_file_request (void *vxbody, void *v9body)
 {
-	request9->recovery_status =
-		convert_enum_to_9 (ndmp_29_recovery_status, request2->error);
-	CNVT_STRDUP_TO_9 (request2, request9, name);
-	return 0;
+  ndmp2_log_file_request *request2 = (ndmp2_log_file_request *) vxbody ;
+  ndmp9_log_file_request *request9 = (ndmp9_log_file_request *) v9body ;
+
+  request9->recovery_status =
+	  convert_enum_to_9(ndmp_29_recovery_status, request2->error) ;
+  CNVT_STRDUP_TO_9(request2, request9, name) ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_log_file_request (
-  ndmp9_log_file_request *request9,
-  ndmp2_log_file_request *request2)
+int ndmp_9to2_log_file_request (void *v9body, void *vxbody)
 {
-	request2->error = convert_enum_from_9 (ndmp_29_recovery_status,
-					request9->recovery_status);
-	CNVT_STRDUP_FROM_9 (request2, request9, name);
-	return 0;
+  ndmp9_log_file_request *request9 = (ndmp9_log_file_request *) v9body ;
+  ndmp2_log_file_request *request2 = (ndmp2_log_file_request *) vxbody ;
+
+  request2->error = convert_enum_from_9(ndmp_29_recovery_status,
+				  request9->recovery_status) ;
+  CNVT_STRDUP_FROM_9(request2, request9, name) ;
+
+  return 0 ;
 }
-
-
 
 
 /*
@@ -2425,62 +2482,63 @@ ndmp_9to2_unix_file_stat (
  * ndmp_fh_add_unix_path_request
  */
 
-int
-ndmp_2to9_fh_add_unix_path_request (
-  ndmp2_fh_add_unix_path_request *request2,
-  ndmp9_fh_add_file_request *request9)
+int ndmp_2to9_fh_add_unix_path_request (void *vxbody, void *v9body)
 {
-	int			n_ent = request2->paths.paths_len;
-	int			i;
-	ndmp9_file *		table;
+  ndmp2_fh_add_unix_path_request *request2 =
+      (ndmp2_fh_add_unix_path_request *) vxbody ;
+  ndmp9_fh_add_file_request *request9 =
+      (ndmp9_fh_add_file_request *) v9body ;
 
-	table = NDMOS_MACRO_NEWN(ndmp9_file, n_ent);
-	if (!table)
-		return -1;
+  int n_ent = request2->paths.paths_len ;
+  int i ;
+  ndmp9_file *table ;
 
-	NDMOS_API_BZERO (table, sizeof *table * n_ent);
+  table = NDMOS_MACRO_NEWN(ndmp9_file, n_ent) ;
+  if (!table) { return -1 ; }
 
-	for (i = 0; i < n_ent; i++) {
-		ndmp2_fh_unix_path *	ent2 = &request2->paths.paths_val[i];
-		ndmp9_file *		ent9 = &table[i];
+  NDMOS_API_BZERO(table, sizeof *table * n_ent) ;
 
-		CNVT_STRDUP_TO_9x (ent2, ent9, name, unix_path);
-		ndmp_2to9_unix_file_stat (&ent2->fstat, &ent9->fstat);
-	}
+  for (i = 0 ; i < n_ent ; i++) {
+    ndmp2_fh_unix_path *ent2 = &request2->paths.paths_val[i] ;
+    ndmp9_file *ent9 = &table[i] ;
 
-	request9->files.files_len = n_ent;
-	request9->files.files_val = table;
+    CNVT_STRDUP_TO_9x(ent2, ent9, name, unix_path) ;
+    ndmp_2to9_unix_file_stat(&ent2->fstat, &ent9->fstat) ;
+  }
 
-	return 0;
+  request9->files.files_len = n_ent ;
+  request9->files.files_val = table ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_fh_add_unix_path_request (
-  ndmp9_fh_add_file_request *request9,
-  ndmp2_fh_add_unix_path_request *request2)
+int ndmp_9to2_fh_add_unix_path_request (void *v9body, void *vxbody)
 {
-	int			n_ent = request9->files.files_len;
-	int			i;
-	ndmp2_fh_unix_path *	table;
+  ndmp9_fh_add_file_request *request9 = (ndmp9_fh_add_file_request *) v9body ;
+  ndmp2_fh_add_unix_path_request *request2 =
+      (ndmp2_fh_add_unix_path_request *) vxbody ;
 
-	table = NDMOS_MACRO_NEWN(ndmp2_fh_unix_path, n_ent);
-	if (!table)
-		return -1;
+  int n_ent = request9->files.files_len ;
+  int i ;
+  ndmp2_fh_unix_path *table ;
 
-	NDMOS_API_BZERO (table, sizeof *table * n_ent);
+  table = NDMOS_MACRO_NEWN(ndmp2_fh_unix_path, n_ent) ;
+  if (!table) { return -1 ; }
 
-	for (i = 0; i < n_ent; i++) {
-		ndmp2_fh_unix_path *	ent2 = &table[i];
-		ndmp9_file *		ent9 = &request9->files.files_val[i];
+  NDMOS_API_BZERO(table, sizeof *table * n_ent) ;
 
-		CNVT_STRDUP_FROM_9x (ent2, ent9, name, unix_path);
-		ndmp_9to2_unix_file_stat (&ent9->fstat, &ent2->fstat);
-	}
+  for (i = 0 ; i < n_ent ; i++) {
+    ndmp2_fh_unix_path *ent2 = &table[i] ;
+    ndmp9_file *ent9 = &request9->files.files_val[i] ;
 
-	request2->paths.paths_len = n_ent;
-	request2->paths.paths_val = table;
+    CNVT_STRDUP_FROM_9x(ent2, ent9, name, unix_path) ;
+    ndmp_9to2_unix_file_stat(&ent9->fstat, &ent2->fstat) ;
+  }
 
-	return 0;
+  request2->paths.paths_len = n_ent ;
+  request2->paths.paths_val = table ;
+
+  return 0 ;
 }
 
 
@@ -2488,115 +2546,115 @@ ndmp_9to2_fh_add_unix_path_request (
  * ndmp_fh_add_unix_dir
  */
 
-int
-ndmp_2to9_fh_add_unix_dir_request (
-  ndmp2_fh_add_unix_dir_request *request2,
-  ndmp9_fh_add_dir_request *request9)
+int ndmp_2to9_fh_add_unix_dir_request (void *vxbody, void *v9body)
 {
-	int			n_ent = request2->dirs.dirs_len;
-	int			i;
-	ndmp9_dir *		table;
+  ndmp2_fh_add_unix_dir_request *request2 =
+      (ndmp2_fh_add_unix_dir_request *) vxbody ;
+  ndmp9_fh_add_dir_request *request9 =
+      (ndmp9_fh_add_dir_request *) v9body ;
 
-	table = NDMOS_MACRO_NEWN(ndmp9_dir, n_ent);
-	if (!table)
-		return -1;
+  int n_ent = request2->dirs.dirs_len ;
+  int i ;
+  ndmp9_dir *table ;
 
-	NDMOS_API_BZERO (table, sizeof *table * n_ent);
+  table = NDMOS_MACRO_NEWN(ndmp9_dir, n_ent) ;
+  if (!table) { return -1 ; }
 
-	for (i = 0; i < n_ent; i++) {
-		ndmp2_fh_unix_dir *	ent2 = &request2->dirs.dirs_val[i];
-		ndmp9_dir *		ent9 = &table[i];
+  NDMOS_API_BZERO (table, sizeof *table * n_ent) ;
 
-		CNVT_STRDUP_TO_9x (ent2, ent9, name, unix_name);
-		CNVT_TO_9 (ent2, ent9, node);
-		CNVT_TO_9 (ent2, ent9, parent);
-	}
+  for (i = 0 ; i < n_ent ; i++) {
+    ndmp2_fh_unix_dir *ent2 = &request2->dirs.dirs_val[i] ;
+    ndmp9_dir *ent9 = &table[i] ;
 
-	request9->dirs.dirs_len = n_ent;
-	request9->dirs.dirs_val = table;
+    CNVT_STRDUP_TO_9x(ent2, ent9, name, unix_name) ;
+    CNVT_TO_9 (ent2, ent9, node) ;
+    CNVT_TO_9 (ent2, ent9, parent) ;
+  }
 
-	return 0;
+  request9->dirs.dirs_len = n_ent ;
+  request9->dirs.dirs_val = table ;
+
+  return 0 ;
 }
 
-int
-ndmp_2to9_fh_add_unix_dir_free_request (ndmp9_fh_add_dir_request *request9)
+int ndmp_2to9_fh_add_unix_dir_free_request (void *v9body)
 {
-    int	i;
+  ndmp9_fh_add_dir_request *request9 = (ndmp9_fh_add_dir_request *) v9body ;
 
-    if (request9) {
-	if(request9->dirs.dirs_val) {
-	    int n_ent = request9->dirs.dirs_len;
+  int i ;
 
-	    for (i = 0; i < n_ent; i++) {
-		ndmp9_dir *ent9 = &request9->dirs.dirs_val[i];
-		if (ent9->unix_name)
-		    NDMOS_API_FREE(ent9->unix_name);
-		ent9->unix_name = 0;
-	    }
+  if (request9) {
+    if (request9->dirs.dirs_val) {
+      int n_ent = request9->dirs.dirs_len ;
 
-	    NDMOS_API_FREE(request9->dirs.dirs_val);
-	}
-	request9->dirs.dirs_val = 0;
+      for (i = 0 ; i < n_ent ; i++) {
+	ndmp9_dir *ent9 = &request9->dirs.dirs_val[i] ;
+	if (ent9->unix_name) { NDMOS_API_FREE(ent9->unix_name) ; }
+	ent9->unix_name = 0 ;
+      }
+
+      NDMOS_API_FREE(request9->dirs.dirs_val) ;
     }
-    return 0;
+    request9->dirs.dirs_val = 0 ;
+  }
+  return 0 ;
 }
 
-int
-ndmp_9to2_fh_add_unix_dir_request (
-  ndmp9_fh_add_dir_request *request9,
-  ndmp2_fh_add_unix_dir_request *request2)
+int ndmp_9to2_fh_add_unix_dir_request (void *v9body, void *vxbody)
 {
-	int			n_ent = request9->dirs.dirs_len;
-	int			i;
-	ndmp2_fh_unix_dir *		table;
+  ndmp9_fh_add_dir_request *request9 = (ndmp9_fh_add_dir_request *) v9body ;
+  ndmp2_fh_add_unix_dir_request *request2 =
+      (ndmp2_fh_add_unix_dir_request *) vxbody ;
 
-	table = NDMOS_MACRO_NEWN(ndmp2_fh_unix_dir, n_ent);
-	if (!table)
-		return -1;
+  int n_ent = request9->dirs.dirs_len ;
+  int i ;
+  ndmp2_fh_unix_dir *table ;
 
-	NDMOS_API_BZERO (table, sizeof *table * n_ent);
+  table = NDMOS_MACRO_NEWN(ndmp2_fh_unix_dir, n_ent) ;
+  if (!table) { return -1 ; }
 
-	for (i = 0; i < n_ent; i++) {
-		ndmp9_dir *		ent9 = &request9->dirs.dirs_val[i];
-		ndmp2_fh_unix_dir *	ent2 = &table[i];
+  NDMOS_API_BZERO(table, sizeof *table * n_ent) ;
 
-		CNVT_STRDUP_FROM_9x (ent2, ent9, name, unix_name);
-		CNVT_FROM_9 (ent2, ent9, node);
-		CNVT_FROM_9 (ent2, ent9, parent);
-	}
+  for (i = 0 ; i < n_ent ; i++) {
+    ndmp9_dir *ent9 = &request9->dirs.dirs_val[i] ;
+    ndmp2_fh_unix_dir *ent2 = &table[i] ;
 
-	request2->dirs.dirs_len = n_ent;
-	request2->dirs.dirs_val = table;
+    CNVT_STRDUP_FROM_9x(ent2, ent9, name, unix_name) ;
+    CNVT_FROM_9(ent2, ent9, node) ;
+    CNVT_FROM_9(ent2, ent9, parent) ;
+  }
 
-	return 0;
+  request2->dirs.dirs_len = n_ent ;
+  request2->dirs.dirs_val = table ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_fh_add_unix_dir_free_request (ndmp2_fh_add_unix_dir_request *request2)
+int ndmp_9to2_fh_add_unix_dir_free_request (void *vxbody)
 {
-    int	i;
+  ndmp2_fh_add_unix_dir_request *request2 =
+      (ndmp2_fh_add_unix_dir_request *) vxbody ;
 
-    if (request2) {
-	if(request2->dirs.dirs_val) {
-	    int n_ent = request2->dirs.dirs_len;
+  int i ;
 
-	    for (i = 0; i < n_ent; i++) {
-		ndmp2_fh_unix_dir *ent2 = &request2->dirs.dirs_val[i];
+  if (request2) {
+    if (request2->dirs.dirs_val) {
+      int n_ent = request2->dirs.dirs_len ;
 
-		if (ent2->name)
-		    NDMOS_API_FREE(ent2->name);
-		ent2->name = 0;
-	    }
+      for (i = 0 ; i < n_ent ; i++) {
+	ndmp2_fh_unix_dir *ent2 = &request2->dirs.dirs_val[i] ;
 
-	    NDMOS_API_FREE(request2->dirs.dirs_val);
-	}
-	request2->dirs.dirs_val = 0;
+	if (ent2->name) { NDMOS_API_FREE(ent2->name) ; }
+	ent2->name = 0 ;
+      }
+
+      NDMOS_API_FREE(request2->dirs.dirs_val) ;
     }
+    request2->dirs.dirs_val = 0 ;
+  }
 
-    return 0;
+  return 0 ;
 }
-
-
 
 
 
@@ -2604,87 +2662,95 @@ ndmp_9to2_fh_add_unix_dir_free_request (ndmp2_fh_add_unix_dir_request *request2)
  * ndmp_fh_add_unix_node
  */
 
-int
-ndmp_2to9_fh_add_unix_node_request (
-  ndmp2_fh_add_unix_node_request *request2,
-  ndmp9_fh_add_node_request *request9)
+int ndmp_2to9_fh_add_unix_node_request (void *vxbody, void *v9body)
 {
-	int			n_ent = request2->nodes.nodes_len;
-	int			i;
-	ndmp9_node *		table;
+  ndmp2_fh_add_unix_node_request *request2 =
+      (ndmp2_fh_add_unix_node_request *) vxbody ;
+  ndmp9_fh_add_node_request *request9 =
+      (ndmp9_fh_add_node_request *) v9body ;
 
-	table = NDMOS_MACRO_NEWN(ndmp9_node, n_ent);
-	if (!table)
-		return -1;
+  int n_ent = request2->nodes.nodes_len ;
+  int i ;
+  ndmp9_node *table ;
 
-	NDMOS_API_BZERO (table, sizeof *table * n_ent);
+  table = NDMOS_MACRO_NEWN(ndmp9_node, n_ent) ;
+  if (!table) { return -1 ; }
 
-	for (i = 0; i < n_ent; i++) {
-		ndmp2_fh_unix_node *	ent2 = &request2->nodes.nodes_val[i];
-		ndmp9_node *		ent9 = &table[i];
+  NDMOS_API_BZERO(table, sizeof *table * n_ent) ;
 
-		ndmp_2to9_unix_file_stat (&ent2->fstat, &ent9->fstat);
-		ent9->fstat.node.valid = NDMP9_VALIDITY_VALID;
-		ent9->fstat.node.value = ent2->node;
-	}
+  for (i = 0 ; i < n_ent ; i++) {
+    ndmp2_fh_unix_node *ent2 = &request2->nodes.nodes_val[i] ;
+    ndmp9_node *ent9 = &table[i] ;
 
-	request9->nodes.nodes_len = n_ent;
-	request9->nodes.nodes_val = table;
+    ndmp_2to9_unix_file_stat(&ent2->fstat, &ent9->fstat) ;
+    ent9->fstat.node.valid = NDMP9_VALIDITY_VALID ;
+    ent9->fstat.node.value = ent2->node ;
+  }
 
-	return 0;
+  request9->nodes.nodes_len = n_ent ;
+  request9->nodes.nodes_val = table ;
+
+  return 0 ;
 }
 
-int
-ndmp_2to9_fh_add_unix_node_free_request (ndmp9_fh_add_node_request *request9)
+int ndmp_2to9_fh_add_unix_node_free_request (void *v9body)
 {
-    if (request9) {
-	if(request9->nodes.nodes_val) {
-	    NDMOS_API_FREE(request9->nodes.nodes_val);
-	}
-	request9->nodes.nodes_val = 0;
+  ndmp9_fh_add_node_request *request9 =
+      (ndmp9_fh_add_node_request *) v9body ;
+
+  if (request9) {
+    if (request9->nodes.nodes_val) {
+      NDMOS_API_FREE(request9->nodes.nodes_val) ;
     }
-    return 0;
+    request9->nodes.nodes_val = 0 ;
+  }
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_fh_add_unix_node_request (
-  ndmp9_fh_add_node_request *request9,
-  ndmp2_fh_add_unix_node_request *request2)
+int ndmp_9to2_fh_add_unix_node_request (void *v9body, void *vxbody)
 {
-	int			n_ent = request9->nodes.nodes_len;
-	int			i;
-	ndmp2_fh_unix_node *	table;
+  ndmp9_fh_add_node_request *request9 =
+      (ndmp9_fh_add_node_request *) v9body ;
+  ndmp2_fh_add_unix_node_request *request2 =
+      (ndmp2_fh_add_unix_node_request *) vxbody ;
 
-	table = NDMOS_MACRO_NEWN(ndmp2_fh_unix_node, n_ent);
-	if (!table)
-		return -1;
+  int n_ent = request9->nodes.nodes_len ;
+  int i ;
+  ndmp2_fh_unix_node *table ;
 
-	NDMOS_API_BZERO (table, sizeof *table * n_ent);
+  table = NDMOS_MACRO_NEWN(ndmp2_fh_unix_node, n_ent) ;
+  if (!table) { return -1 ; }
 
-	for (i = 0; i < n_ent; i++) {
-		ndmp9_node *		ent9 = &request9->nodes.nodes_val[i];
-		ndmp2_fh_unix_node *	ent2 = &table[i];
+  NDMOS_API_BZERO(table, sizeof *table * n_ent) ;
 
-		ndmp_9to2_unix_file_stat (&ent9->fstat, &ent2->fstat);
-		ent2->node = ent9->fstat.node.value;
-	}
+  for (i = 0 ; i < n_ent ; i++) {
+    ndmp9_node *ent9 = &request9->nodes.nodes_val[i] ;
+    ndmp2_fh_unix_node *ent2 = &table[i] ;
 
-	request2->nodes.nodes_len = n_ent;
-	request2->nodes.nodes_val = table;
+    ndmp_9to2_unix_file_stat(&ent9->fstat, &ent2->fstat) ;
+    ent2->node = ent9->fstat.node.value ;
+  }
 
-	return 0;
+  request2->nodes.nodes_len = n_ent ;
+  request2->nodes.nodes_val = table ;
+
+  return 0 ;
 }
 
-int
-ndmp_9to2_fh_add_unix_node_free_request (ndmp2_fh_add_unix_node_request *request2)
+int ndmp_9to2_fh_add_unix_node_free_request (void *vxbody)
 {
-    if (request2) {
-	if(request2->nodes.nodes_val) {
-	    NDMOS_API_FREE(request2->nodes.nodes_val);
-	}
-	request2->nodes.nodes_val = 0;
+  ndmp2_fh_add_unix_node_request *request2 =
+      (ndmp2_fh_add_unix_node_request *) vxbody ;
+
+  if (request2) {
+    if (request2->nodes.nodes_val) {
+      NDMOS_API_FREE(request2->nodes.nodes_val) ;
     }
-    return 0;
+    request2->nodes.nodes_val = 0 ;
+  }
+
+  return 0 ;
 }
 
 

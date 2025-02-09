@@ -53,7 +53,7 @@ const NDMP4VER = 4;
 const NDMP4PORT = 10000;
 
 %#define ndmp4_u_quad unsigned long long
-%extern bool_t xdr_ndmp4_u_quad();
+%extern bool_t xdr_ndmp4_u_quad(register XDR *xdrs, ndmp4_u_quad *objp) ;
 
 struct _ndmp4_u_quad
 {

@@ -53,7 +53,7 @@ const NDMP3VER = 3;
 const NDMP3PORT = 10000;
 
 %#define ndmp3_u_quad unsigned long long
-%extern bool_t xdr_ndmp3_u_quad();
+%extern bool_t xdr_ndmp3_u_quad(register XDR *xdrs, ndmp3_u_quad *objp);
 
 struct _ndmp3_u_quad
 {

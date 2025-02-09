@@ -54,8 +54,7 @@ const NDMP2VER = 2;
 const NDMP2PORT = 10000;
 
 %#define ndmp2_u_quad unsigned long long
-%extern bool_t xdr_ndmp2_u_quad();
-
+%extern bool_t xdr_ndmp2_u_quad(register XDR *xdrs, ndmp2_u_quad *objp);
 struct _ndmp2_u_quad
 {
 	u_long		high;

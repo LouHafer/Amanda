@@ -212,8 +212,8 @@ enum ndmp9_message {
 /*
  * Common message bodies
  */
-%extern bool_t xdr_ndmp9_no_arguments();
 %#define ndmp9_no_arguments int
+%extern bool_t xdr_ndmp9_no_arguments(register XDR *xdrs, ndmp9_no_arguments *objp) ;
 
 struct ndmp9_just_error_reply {
 	ndmp9_error	error;
@@ -223,8 +223,8 @@ struct ndmp9_just_error_reply {
 /*
  * 64-bit integers
  */
-%extern bool_t xdr_ndmp9_u_quad();
 %#define ndmp9_u_quad unsigned long long
+%extern bool_t xdr_ndmp9_u_quad(register XDR *xdrs, ndmp9_u_quad *objp) ;
 
 /*
  * Valid values. Sometimes we have values, and sometimes we don't.

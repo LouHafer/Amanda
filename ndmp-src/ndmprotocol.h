@@ -92,6 +92,11 @@
  *	   Maybe someday rpcgen(1) will generate these, too.
  */
 
+/*
+  Included for XDR function typedefs
+*
+
+#include <rpc/xdr.h>
 
 /*
  * PROTOCOL VERSIONS
@@ -136,8 +141,8 @@
 
 struct ndmp_xdr_message_table {
 	int	msg;
-	int	(*xdr_request)();
-	int	(*xdr_reply)();
+	xdrproc_t xdr_request ;
+	xdrproc_t xdr_reply ;
 };
 
 extern struct ndmp_xdr_message_table	ndmp0_xdr_message_table[];

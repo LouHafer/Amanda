@@ -1365,7 +1365,7 @@ get_part_bytes_written_impl(
 
 static void
 instance_init(
-    XferElement *elt)
+    XferElement *elt, void *)
 {
     XferDestTaperCacher *self = XFER_DEST_TAPER_CACHER(elt);
     elt->can_generate_eof = FALSE;
@@ -1434,7 +1434,7 @@ finalize_impl(
 
 static void
 class_init(
-    XferDestTaperCacherClass * selfc)
+    XferDestTaperCacherClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     XferDestTaperClass *xdt_klass = XFER_DEST_TAPER_CLASS(selfc);

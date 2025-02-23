@@ -174,7 +174,7 @@ push_buffer_impl(
 
 static void
 instance_init(
-    XferElement *elt)
+    XferElement *elt, void *)
 {
     XferDestDevice *self = XFER_DEST_DEVICE(elt);
     self->partial = NULL;
@@ -193,7 +193,7 @@ finalize_impl(
 
 static void
 class_init(
-    XferDestDeviceClass * selfc)
+    XferDestDeviceClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     GObjectClass *goc = (GObjectClass*) klass;

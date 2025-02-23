@@ -417,7 +417,11 @@ get_fstab_nextentry(
 #endif /* } */
 
 #ifndef IGNORE_FSTAB
+/*
+  What is the point of this declaration? Seems completely redundant.
+
 static int samefile(struct stat[3], struct stat *);
+*/
 
 static int
 samefile(

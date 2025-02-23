@@ -77,14 +77,7 @@ struct event_handle {
  * events and for deleting dead events */
 GSList *all_events = NULL;
 
-#if (GLIB_MAJOR_VERSION > 2 || (GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION >= 31))
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-#endif
-GStaticMutex event_mutex = G_STATIC_MUTEX_INIT;
-#if (GLIB_MAJOR_VERSION > 2 || (GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION >= 31))
-# pragma GCC diagnostic pop
-#endif
+static GMutex event_mutex ;
 
 /* should event_loop_run stop? */
 gboolean stop = FALSE;
@@ -151,7 +144,7 @@ event_create(
 {
     event_handle_t *handle;
 
-    g_static_mutex_lock(&event_mutex);
+    g_mutex_lock(&event_mutex);
 
     /* sanity-checking */
     if ((type == EV_READFD) || (type == EV_WRITEFD)) {
@@ -176,7 +169,7 @@ event_create(
     event_debug(1, _("event: register: %p->data=%jd, type=%s\n"),
 		    handle, handle->data, event_type2str(handle->type));
 
-    g_static_mutex_unlock(&event_mutex);
+    g_mutex_unlock(&event_mutex);
     return handle;
 }
 
@@ -187,7 +180,7 @@ event_activate(
     GIOCondition cond;
     assert(handle != NULL);
 
-    g_static_mutex_lock(&event_mutex);
+    g_mutex_lock(&event_mutex);
 
     /* add to the list of events */
     all_events = g_slist_prepend(all_events, (gpointer)handle);
@@ -238,7 +231,7 @@ event_activate(
 	    error(_("Unknown event type %s"), event_type2str(handle->type));
     }
 
-    g_static_mutex_unlock(&event_mutex);
+    g_mutex_unlock(&event_mutex);
     return;
 }
 
@@ -254,7 +247,7 @@ event_release(
 {
     assert(handle != NULL);
 
-    g_static_mutex_lock(&event_mutex);
+    g_mutex_lock(&event_mutex);
     event_debug(1, _("event: release (mark): %p data=%jd, type=%s\n"),
 		    handle, handle->data,
 		    event_type2str(handle->type));
@@ -267,7 +260,7 @@ event_release(
 	g_main_loop_quit(default_main_loop());
     }
 
-    g_static_mutex_unlock(&event_mutex);
+    g_mutex_unlock(&event_mutex);
 }
 
 /*
@@ -281,7 +274,7 @@ event_wakeup(
     GSList *tofire = NULL;
     int nwaken = 0;
 
-    g_static_mutex_lock(&event_mutex);
+    g_mutex_lock(&event_mutex);
     event_debug(1, _("event: wakeup: enter (%jd)\n"), id);
 
     /* search for any and all matching events, and record them.  This way
@@ -300,9 +293,9 @@ event_wakeup(
 	if (eh->type == EV_WAIT && eh->data == id && !eh->is_dead) {
 	    event_debug(1, _("A: event: wakeup triggering: %p id=%jd\n"), eh, id);
 	    /* The lcok must be release before running the event */
-	    g_static_mutex_unlock(&event_mutex);
+	    g_mutex_unlock(&event_mutex);
 	    fire(eh);
-	    g_static_mutex_lock(&event_mutex);
+	    g_mutex_lock(&event_mutex);
 	    nwaken++;
 	}
     }
@@ -310,7 +303,7 @@ event_wakeup(
     /* and free the temporary list */
     g_slist_free(tofire);
 
-    g_static_mutex_unlock(&event_mutex);
+    g_mutex_unlock(&event_mutex);
     return (nwaken);
 }
 
@@ -402,7 +395,7 @@ event_loop_wait(
     gboolean return_when_empty)
 {
     global_return_when_empty = return_when_empty;
-    g_static_mutex_lock(&event_mutex);
+    g_mutex_lock(&event_mutex);
     event_debug(1, _("event: loop: enter: nonblockg=%d, eh=%p\n"), nonblock, wait_eh);
 
     /* If we're waiting for a specific event, then reset its has_fired flag */
@@ -423,9 +416,9 @@ event_loop_wait(
 
 	/* Do an iteration */
 	/* Relese the lock before running an iteration */
-	g_static_mutex_unlock(&event_mutex);
+	g_mutex_unlock(&event_mutex);
 	g_main_context_iteration(NULL, !nonblock);
-	g_static_mutex_lock(&event_mutex);
+	g_mutex_lock(&event_mutex);
 
 	/* stop if we're told to */
 	if (!return_when_empty && stop)
@@ -447,7 +440,7 @@ event_loop_wait(
      * has been released. */
     flush_dead_events(NULL);
 
-    g_static_mutex_unlock(&event_mutex);
+    g_mutex_unlock(&event_mutex);
 }
 
 GMainLoop *

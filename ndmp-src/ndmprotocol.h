@@ -94,7 +94,7 @@
 
 /*
   Included for XDR function typedefs
-*
+*/
 
 #include <rpc/xdr.h>
 

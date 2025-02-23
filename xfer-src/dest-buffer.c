@@ -114,7 +114,7 @@ push_buffer_impl(
 	self->allocated = new_size;
     }
 
-    g_memmove(((guint8 *)self->buf)+self->len, buf, len);
+    memmove(((guint8 *)self->buf)+self->len, buf, len);
     self->len += len;
 
     amfree(buf);
@@ -151,7 +151,7 @@ push_buffer_static_impl(
 	self->allocated = new_size;
     }
 
-    g_memmove(((guint8 *)self->buf)+self->len, buf, len);
+    memmove(((guint8 *)self->buf)+self->len, buf, len);
     self->len += len;
 }
 
@@ -171,7 +171,7 @@ finalize_impl(
 
 static void
 class_init(
-    XferDestBufferClass * selfc)
+    XferDestBufferClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     GObjectClass *goc = G_OBJECT_CLASS(selfc);

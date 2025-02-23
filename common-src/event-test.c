@@ -607,7 +607,7 @@ test_child_watch_source(void)
 
     /* set up a child watch */
     src = new_child_watch_source(pid);
-    g_source_set_callback(src, (GSourceFunc)test_child_watch_callback,
+    g_source_set_callback(src, G_SOURCE_FUNC(test_child_watch_callback),
 	     GINT_TO_POINTER(pid), NULL);
     g_source_attach(src, NULL);
     g_source_unref(src);
@@ -628,7 +628,7 @@ test_child_watch_source(void)
     sleep(1);
     /* set up a child watch */
     src2 = new_child_watch_source(pid2);
-    g_source_set_callback(src2, (GSourceFunc)test_child_watch_callback,
+    g_source_set_callback(src2, G_SOURCE_FUNC(test_child_watch_callback),
 	     GINT_TO_POINTER(pid2), NULL);
     g_source_attach(src2, NULL);
     g_source_unref(src2);

@@ -395,7 +395,7 @@ runssh(
 	aclose(wpipe[0]);
 	rc->child_watch = new_child_watch_source(rc->pid);
 	g_source_set_callback(rc->child_watch,
-            (GSourceFunc)ssh_child_watch_callback, rc, NULL);
+            G_SOURCE_FUNC(ssh_child_watch_callback), rc, NULL);
 	g_source_attach(rc->child_watch, NULL);
 	g_source_unref(rc->child_watch);
 

@@ -371,7 +371,7 @@ guint32 xfer_source_random_get_seed(
  char * pat;
 
  pat = SvPV($input, len);
- $1 = g_memdup(pat, len);
+ $1 = g_memdup2(pat, len);
  $2 = len;
 }
 

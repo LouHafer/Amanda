@@ -1100,7 +1100,7 @@ new_space_available_impl(
 }
 static void
 instance_init(
-    XferElement *elt)
+    XferElement *elt, void *)
 {
     XferDestTaperSplitter *self = XFER_DEST_TAPER_SPLITTER(elt);
     elt->can_generate_eof = FALSE;
@@ -1179,7 +1179,7 @@ finalize_impl(
 
 static void
 class_init(
-    XferDestTaperSplitterClass * selfc)
+    XferDestTaperSplitterClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     XferDestTaperClass *xdt_klass = XFER_DEST_TAPER_CLASS(selfc);

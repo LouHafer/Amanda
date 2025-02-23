@@ -73,7 +73,7 @@ start_impl(
 
 static void
 class_init(
-    XferDestDirectTCPListenClass * selfc)
+    XferDestDirectTCPListenClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     static xfer_element_mech_pair_t mech_pairs[] = {

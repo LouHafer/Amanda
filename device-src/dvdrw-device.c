@@ -101,10 +101,10 @@ static Device*
 dvdrw_device_factory(char *device_name, char *device_type, char *device_node);
 
 static void
-dvdrw_device_class_init (DvdRwDeviceClass *c);
+dvdrw_device_class_init (DvdRwDeviceClass *c, void *);
 
 static void
-dvdrw_device_init (DvdRwDevice *self);
+dvdrw_device_init (DvdRwDevice *self, void *);
 
 /* Properties */
 static gboolean
@@ -244,7 +244,7 @@ dvdrw_device_factory(char *device_name, char *device_type, char *device_node)
 }
 
 static void
-dvdrw_device_class_init (DvdRwDeviceClass *c)
+dvdrw_device_class_init (DvdRwDeviceClass *c, void *)
 {
     DeviceClass *device_class = DEVICE_CLASS(c);
     GObjectClass *g_object_class = G_OBJECT_CLASS(c);
@@ -288,7 +288,7 @@ dvdrw_device_class_init (DvdRwDeviceClass *c)
 }
 
 static void
-dvdrw_device_init (DvdRwDevice *self)
+dvdrw_device_init (DvdRwDevice *self, void *)
 {
     Device *dself = DEVICE(self);
     GValue val;

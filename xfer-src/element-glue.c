@@ -2338,7 +2338,7 @@ g_critical("PUSH_TO_RING_BUFFER not implemented");
 
 static void
 instance_init(
-    XferElementGlue *self)
+    XferElementGlue *self, void *)
 {
     XferElement *elt = (XferElement *)self;
     elt->can_generate_eof = TRUE;
@@ -2474,7 +2474,7 @@ xfer_element_mech_pair_t *xfer_element_glue_mech_pairs = _pairs;
 
 static void
 class_init(
-    XferElementGlueClass * selfc)
+    XferElementGlueClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     GObjectClass *goc = G_OBJECT_CLASS(selfc);

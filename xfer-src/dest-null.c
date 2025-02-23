@@ -149,7 +149,7 @@ push_buffer_static_impl(
 
 static void
 class_init(
-    XferDestNullClass * selfc)
+    XferDestNullClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     static xfer_element_mech_pair_t mech_pairs[] = {

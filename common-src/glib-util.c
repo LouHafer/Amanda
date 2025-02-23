@@ -146,12 +146,6 @@ glib_init(void) {
      * threads, so it must be done after curl is initialized. */
     g_type_init();
 
-    /* And set up glib's threads */
-#if defined(G_THREADS_ENABLED) && !defined(G_THREADS_IMPL_NONE)
-    if (!g_thread_supported())
-	g_thread_init(NULL);
-#endif
-
     /* Initialize global mutex */
     file_mutex = g_mutex_new();
     shm_ring_mutex = g_mutex_new();

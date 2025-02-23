@@ -261,7 +261,7 @@ try_threads(void)
 
     glib_init();
 
-    thd = g_thread_create(thread_fn, (gpointer)&data, TRUE, NULL);
+    thd = g_thread_new("perltest",thread_fn, (gpointer)&data);
     g_thread_join(thd);
     g_assert(data == 1);
 }

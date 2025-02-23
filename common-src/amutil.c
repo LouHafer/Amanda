@@ -1115,8 +1115,7 @@ char *hexencode_string(const char *str)
     }
 
 cleanup:
-    ret = s->str;
-    g_string_free(s, FALSE);
+    ret = g_string_free_and_steal(s);
     return ret;
 }
 
@@ -1187,8 +1186,7 @@ char *hexdecode_string(const char *str, GError **err)
     }
 
 cleanup:
-    ret = s->str;
-    g_string_free(s, FALSE);
+    ret = g_string_free_and_steal(s);
     return ret;
 }
 
@@ -1526,9 +1524,9 @@ char * portable_readdir(DIR* handle) {
     struct dirent *entry_p;
 #endif
 
-    static GStaticMutex mutex = G_STATIC_MUTEX_INIT;
+    static GMutex mutex ;
 
-    g_static_mutex_lock(&mutex);
+    g_mutex_lock(&mutex);
 
 #ifdef USE_READDIR
     entry_p = readdir(handle);
@@ -1537,7 +1535,7 @@ char * portable_readdir(DIR* handle) {
     entry_p = readdir64(handle);
 #endif
 
-    g_static_mutex_unlock(&mutex);
+    g_mutex_unlock(&mutex);
     
     if (entry_p == NULL)
         return NULL;

@@ -50,7 +50,7 @@ directtcp_connection_finalize(GObject *goself)
 
 static void
 directtcp_connection_class_init(
-        DirectTCPConnectionClass * c)
+        DirectTCPConnectionClass * c, void *)
 {
     GObjectClass *goc = (GObjectClass *)c;
 
@@ -127,13 +127,14 @@ directtcp_connection_socket_close(DirectTCPConnection *dself)
 }
 
 static void
-directtcp_connection_socket_init(DirectTCPConnectionSocket *self)
+directtcp_connection_socket_init(DirectTCPConnectionSocket *self, void *)
 {
     self->socket = -1;
 }
 
 static void
-directtcp_connection_socket_class_init(DirectTCPConnectionSocketClass * c)
+directtcp_connection_socket_class_init(DirectTCPConnectionSocketClass * c,
+				       void *)
 {
     DirectTCPConnectionClass *connc = (DirectTCPConnectionClass *)c;
 

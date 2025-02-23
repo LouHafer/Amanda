@@ -76,7 +76,7 @@ set_sv_from_gvalue(GValue *value)
     sv = sv_newmortal();
     switch (fundamental) {
 	case G_TYPE_CHAR:
-	    sv_setiv(sv, g_value_get_char(value));
+	    sv_setiv(sv, g_value_get_schar(value));
 	    break;
 
 	case G_TYPE_UCHAR:
@@ -163,7 +163,7 @@ set_gvalue_from_sv(SV *sv, GValue *value)
 	case G_TYPE_CHAR:
 	    {	gint8 val = amglue_SvI8(sv, &err);
 		if (err) { g_free(err); return FALSE; };
-		g_value_set_char(value, val);
+		g_value_set_schar(value, val);
 		return TRUE;
 	    }
 

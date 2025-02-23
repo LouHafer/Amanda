@@ -136,14 +136,14 @@ pull_buffer_impl(
 
 static void
 instance_init(
-    XferElement *elt)
+    XferElement *elt, void *)
 {
     elt->can_generate_eof = TRUE;
 }
 
 static void
 class_init(
-    XferSourceDeviceClass * selfc)
+    XferSourceDeviceClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     static xfer_element_mech_pair_t mech_pairs[] = {

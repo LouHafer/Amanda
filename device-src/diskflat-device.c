@@ -68,10 +68,10 @@ static Device*
 diskflat_device_factory(char *device_name, char *device_type, char *device_node);
 
 static void
-diskflat_device_class_init (DiskflatDeviceClass *c);
+diskflat_device_class_init (DiskflatDeviceClass *c, void *);
 
 static void
-diskflat_device_init (DiskflatDevice *self);
+diskflat_device_init (DiskflatDevice *self, void *);
 
 /* Methods */
 static void
@@ -159,7 +159,7 @@ diskflat_device_factory(
 
 static void
 diskflat_device_class_init (
-    DiskflatDeviceClass *c)
+    DiskflatDeviceClass *c, void *)
 {
     DeviceClass *device_class = DEVICE_CLASS(c);
     GObjectClass *g_object_class = G_OBJECT_CLASS(c);
@@ -175,7 +175,7 @@ diskflat_device_class_init (
 
 static void
 diskflat_device_init (
-    DiskflatDevice *self)
+    DiskflatDevice *self, void *)
 {
     Device *dself = DEVICE(self);
     VfsDevice *vself = VFS_DEVICE(self);

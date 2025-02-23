@@ -93,14 +93,14 @@ finalize_impl(
 
 static void
 instance_init(
-    XferElement *elt)
+    XferElement *elt, void *)
 {
     elt->can_generate_eof = FALSE;
 }
 
 static void
 class_init(
-    XferSourceDirectTCPConnectClass * selfc)
+    XferSourceDirectTCPConnectClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     GObjectClass *goc = G_OBJECT_CLASS(selfc);

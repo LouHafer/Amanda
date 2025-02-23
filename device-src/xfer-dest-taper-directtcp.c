@@ -425,7 +425,7 @@ get_part_bytes_written_impl(
 
 static void
 instance_init(
-    XferElement *elt)
+    XferElement *elt, void *)
 {
     XferDestTaperDirectTCP *self = XFER_DEST_TAPER_DIRECTTCP(elt);
     elt->can_generate_eof = FALSE;
@@ -470,7 +470,7 @@ finalize_impl(
 
 static void
 class_init(
-    XferDestTaperDirectTCPClass * selfc)
+    XferDestTaperDirectTCPClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     XferDestTaperClass *xdt_klass = XFER_DEST_TAPER_CLASS(selfc);

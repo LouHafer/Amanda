@@ -155,14 +155,7 @@ static struct mword_regexes mword_slash_regexes = {
  * be called from within threads, so play it safe.
  */
 
-#if (GLIB_MAJOR_VERSION > 2 || (GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION >= 31))
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-  static GStaticMutex re_cache_mutex = G_STATIC_MUTEX_INIT;
-# pragma GCC diagnostic pop
-#else
-  static GStaticMutex re_cache_mutex = G_STATIC_MUTEX_INIT;
-#endif
+static GMutex re_cache_mutex ;
 static GHashTable *regex_cache = NULL, *regex_cache_newline = NULL;
 
 /*
@@ -256,7 +249,7 @@ static regex_t *get_regex_from_cache(const char *re_str, regex_errbuf *errbuf,
     regex_t *ret;
     GHashTable *cache;
 
-    g_static_mutex_lock(&re_cache_mutex);
+    g_mutex_lock(&re_cache_mutex);
 
     init_regex_caches();
 
@@ -278,7 +271,7 @@ static regex_t *get_regex_from_cache(const char *re_str, regex_errbuf *errbuf,
     ret = NULL;
 
 out:
-    g_static_mutex_unlock(&re_cache_mutex);
+    g_mutex_unlock(&re_cache_mutex);
     return ret;
 }
 

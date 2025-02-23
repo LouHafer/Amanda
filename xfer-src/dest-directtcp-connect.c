@@ -93,7 +93,7 @@ finalize_impl(
 
 static void
 class_init(
-    XferDestDirectTCPConnectClass * selfc)
+    XferDestDirectTCPConnectClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     GObjectClass *goc = G_OBJECT_CLASS(selfc);

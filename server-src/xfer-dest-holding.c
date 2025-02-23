@@ -1003,7 +1003,7 @@ get_chunk_bytes_written_impl(
 
 static void
 instance_init(
-    XferElement *elt)
+    XferElement *elt, void *)
 {
     XferDestHolding *self = XFER_DEST_HOLDING(elt);
     elt->can_generate_eof = FALSE;
@@ -1061,7 +1061,7 @@ finalize_impl(
 
 static void
 class_init(
-    XferDestHoldingClass * selfc)
+    XferDestHoldingClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     XferDestHoldingClass *xdh_klass = XFER_DEST_HOLDING_CLASS(selfc);

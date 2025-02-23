@@ -2015,7 +2015,7 @@ ndmp_device_set_leom_fn(Device *dself,
 }
 
 static void
-ndmp_device_class_init(NdmpDeviceClass * c G_GNUC_UNUSED)
+ndmp_device_class_init(NdmpDeviceClass * c G_GNUC_UNUSED, void *)
 {
     GObjectClass *g_object_class = (GObjectClass*) c;
     DeviceClass *device_class = (DeviceClass *)c;
@@ -2084,7 +2084,7 @@ ndmp_device_class_init(NdmpDeviceClass * c G_GNUC_UNUSED)
 }
 
 static void
-ndmp_device_init(NdmpDevice *self)
+ndmp_device_init(NdmpDevice *self, void *)
 {
     Device *dself = DEVICE(self);
     GValue response;
@@ -2313,7 +2313,7 @@ error:
 }
 
 static void
-directtcp_connection_ndmp_class_init(DirectTCPConnectionNDMPClass * c)
+directtcp_connection_ndmp_class_init(DirectTCPConnectionNDMPClass * c, void *)
 {
     DirectTCPConnectionClass *connc = (DirectTCPConnectionClass *)c;
 

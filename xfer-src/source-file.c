@@ -75,7 +75,7 @@ start_impl(
 
 static void
 instance_init(
-    XferElement *elt)
+    XferElement *elt, void *)
 {
     make_crc_table();
     crc32_init(&elt->crc);
@@ -83,7 +83,7 @@ instance_init(
 
 static void
 class_init(
-    XferSourceFileClass * selfc)
+    XferSourceFileClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     static xfer_element_mech_pair_t mech_pairs[] = {

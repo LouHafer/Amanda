@@ -56,7 +56,7 @@ expand_buffer(
     /* allocate space in the buffer if necessary */
     if (buf->offset + new_len > buf->size) {
 	if (buf->offset != 0 && new_len <= buf->size) {
-	    g_memmove(buf->buf,
+	    memmove(buf->buf,
 		      buf->buf + buf->offset,
 		      buf->length);
 	    buf->offset = 0;
@@ -75,7 +75,7 @@ add_to_buffer(
 {
     expand_buffer(buf, size);
 
-    g_memmove(buf->buf + buf->offset + buf->length, data, size);
+    memmove(buf->buf + buf->offset + buf->length, data, size);
     buf->length += size;
 }
 
@@ -450,7 +450,7 @@ ipc_binary_poll_message(
 
 	    /* copy and terminate the string */
 	    data = g_malloc(arglen+1);
-	    g_memmove(data, p, arglen);
+	    memmove(data, p, arglen);
 	    data[arglen] = '\0';
 	    msg->args[arg_id].data = (gpointer)data;
 	    msg->args[arg_id].len = arglen;
@@ -528,7 +528,7 @@ ipc_binary_queue_message(
 	p = put_guint32(p, msg->args[i].len);
 	p = put_guint16(p, i);
 
-	g_memmove(p, msg->args[i].data, msg->args[i].len);
+	memmove(p, msg->args[i].data, msg->args[i].len);
 	p += msg->args[i].len;
     }
     chan->out.length += msg_len;

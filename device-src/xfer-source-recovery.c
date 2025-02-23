@@ -738,7 +738,7 @@ finalize_impl(
 
 static void
 instance_init(
-    XferElement *elt)
+    XferElement *elt, void *)
 {
     XferSourceRecovery *self = XFER_SOURCE_RECOVERY(elt);
 
@@ -751,7 +751,7 @@ instance_init(
 
 static void
 class_init(
-    XferSourceRecoveryClass * xsr_klass)
+    XferSourceRecoveryClass * xsr_klass, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(xsr_klass);
     GObjectClass *gobject_klass = G_OBJECT_CLASS(xsr_klass);

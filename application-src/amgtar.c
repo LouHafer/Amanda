@@ -2231,13 +2231,13 @@ amgtar_get_incrname(
 	    dbprintf("%s\n", errmsg);
 	    aclose(outfd);
 	    amfree(incrname);
-	    amfree(errmsg);
 	    dbprintf("%s\n", errmsg);
 	    if (command == CMD_ESTIMATE) {
 		fprintf(mesgstream, "ERROR %s\n", errmsg);
 	    } else {
 		fprintf(mesgstream, "sendbackup: error [%s]\n", errmsg);
 	    }
+	    amfree(errmsg);
 	    exit(1);
 	}
 	if (close(outfd) != 0) {
@@ -2245,13 +2245,13 @@ amgtar_get_incrname(
 			         incrname, strerror(errno));
 	    dbprintf("%s\n", errmsg);
 	    amfree(incrname);
-	    amfree(errmsg);
 	    dbprintf("%s\n", errmsg);
 	    if (command == CMD_ESTIMATE) {
 		fprintf(mesgstream, "ERROR %s\n", errmsg);
 	    } else {
 		fprintf(mesgstream, "sendbackup: error [%s]\n", errmsg);
 	    }
+	    amfree(errmsg);
 	    exit(1);
 	}
 

@@ -106,7 +106,7 @@ append_to_tapelist(
 
     /* see if we have this tape already, and if so just add to its file list */
     for(cur_tape = tapelist; cur_tape; cur_tape = cur_tape->next) {
-	if ((!storage || cur_tape->storage ||
+	if ((!storage || !cur_tape->storage ||
 	     g_str_equal(storage, cur_tape->storage)) &&
 	    g_str_equal(label, cur_tape->label)) {
 	    int d_idx = 0;

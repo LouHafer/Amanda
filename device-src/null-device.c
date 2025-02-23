@@ -57,8 +57,8 @@ struct _NullDeviceClass {
 void null_device_register(void);
 
 /* here are local prototypes */
-static void null_device_init (NullDevice * o);
-static void null_device_class_init (NullDeviceClass * c);
+static void null_device_init (NullDevice * o, void *);
+static void null_device_class_init (NullDeviceClass * c, void *);
 static void null_device_base_init (NullDeviceClass * c);
 static DeviceStatusFlags null_device_read_label(Device * dself);
 static void null_device_open_device(Device * self, char *device_name,
@@ -107,7 +107,7 @@ null_device_get_type (void)
 }
 
 static void
-null_device_init (NullDevice * self)
+null_device_init (NullDevice * self, void *)
 {
     Device * dself;
     GValue response;
@@ -169,7 +169,7 @@ null_device_init (NullDevice * self)
 }
 
 static void
-null_device_class_init (NullDeviceClass * c)
+null_device_class_init (NullDeviceClass * c, void *)
 {
     DeviceClass *device_class = (DeviceClass *)c;
 

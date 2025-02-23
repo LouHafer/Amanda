@@ -38,14 +38,7 @@
  * New Implementation
  */
 
-#if (GLIB_MAJOR_VERSION > 2 || (GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION >= 31))
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-  static GStaticMutex lock_lock = G_STATIC_MUTEX_INIT;
-# pragma GCC diagnostic pop
-#else
-  static GStaticMutex lock_lock = G_STATIC_MUTEX_INIT;
-#endif
+static GMutex lock_lock ;
 static GHashTable *locally_locked_files = NULL;
 static int lock_rw_rd(file_lock *lock, short l_type);
 
@@ -64,7 +57,7 @@ void
 file_lock_free(
     file_lock *lock)
 {
-    g_static_mutex_lock(&lock_lock);
+    g_mutex_lock(&lock_lock);
     if (locally_locked_files) {
 	g_hash_table_remove(locally_locked_files,
 			    lock->filename);
@@ -78,7 +71,7 @@ file_lock_free(
     if (lock->fd != -1)
 	close(lock->fd);
 
-    g_static_mutex_unlock(&lock_lock);
+    g_mutex_unlock(&lock_lock);
     g_free(lock);
 }
 
@@ -95,7 +88,7 @@ file_lock_lock(
     g_assert(!lock->locked);
 
     /* protect from overlapping lock operations within a process */
-    g_static_mutex_lock(&lock_lock);
+    g_mutex_lock(&lock_lock);
     if (!locally_locked_files) {
 	locally_locked_files = g_hash_table_new(g_str_hash, g_str_equal);
     }
@@ -189,7 +182,7 @@ file_lock_lock(
     rv = 0;
 
 done:
-    g_static_mutex_unlock(&lock_lock);
+    g_mutex_unlock(&lock_lock);
     if (fd >= 0) /* close and unlock if an error occurred */
 	close(fd);
     errno = saved_errno;
@@ -210,7 +203,7 @@ lock_rw_rd(
     g_assert(!lock->locked);
 
     /* protect from overlapping lock operations within a process */
-    g_static_mutex_lock(&lock_lock);
+    g_mutex_lock(&lock_lock);
 
     /* The locks are advisory, so an error here never means the lock is already
      * taken. */
@@ -252,7 +245,7 @@ lock_rw_rd(
 
 done:
     saved_errno = errno;
-    g_static_mutex_unlock(&lock_lock);
+    g_mutex_unlock(&lock_lock);
     if (fd >= 0) /* close and unlock if an error occurred */
 	close(fd);
     errno = saved_errno;
@@ -326,7 +319,7 @@ file_lock_unlock(
 {
     g_assert(lock->locked);
 
-    g_static_mutex_lock(&lock_lock);
+    g_mutex_lock(&lock_lock);
 
     /* relase the filesystem-level lock */
     close(lock->fd);
@@ -336,7 +329,7 @@ file_lock_unlock(
 	g_hash_table_remove(locally_locked_files, lock->filename);
     }
 
-    g_static_mutex_unlock(&lock_lock);
+    g_mutex_unlock(&lock_lock);
 
     if (lock->data)
 	g_free(lock->data);

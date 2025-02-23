@@ -220,7 +220,7 @@ start_impl(
     /* watch for child death */
     self->child_watch = new_child_watch_source(self->child_pid);
     g_source_set_callback(self->child_watch,
-	    (GSourceFunc)child_watch_callback, self, NULL);
+	    G_SOURCE_FUNC(child_watch_callback), self, NULL);
     g_source_attach(self->child_watch, NULL);
     g_source_unref(self->child_watch);
 
@@ -268,7 +268,7 @@ cancel_impl(
 
 static void
 instance_init(
-    XferElement *elt)
+    XferElement *elt, void *)
 {
     XferFilterProcess *self = (XferFilterProcess *)elt;
 
@@ -295,7 +295,7 @@ finalize_impl(
 
 static void
 class_init(
-    XferFilterProcessClass * selfc)
+    XferFilterProcessClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     GObjectClass *goc = (GObjectClass*) klass;

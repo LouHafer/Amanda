@@ -151,8 +151,8 @@ typedef struct ThreadInfo {
 void rait_device_register (void);
 
 /* here are local prototypes */
-static void rait_device_init (RaitDevice * o);
-static void rait_device_class_init (RaitDeviceClass * c);
+static void rait_device_init (RaitDevice * o, void *);
+static void rait_device_class_init (RaitDeviceClass * c, void *);
 static void rait_device_base_init (RaitDeviceClass * c);
 static void rait_device_open_device (Device * self, char * device_name, char * device_type, char * device_node);
 static gboolean rait_device_start (Device * self, DeviceAccessMode mode,
@@ -295,7 +295,7 @@ rait_device_finalize(GObject *obj_self)
 }
 
 static void
-rait_device_init (RaitDevice * o G_GNUC_UNUSED)
+rait_device_init (RaitDevice * o G_GNUC_UNUSED, void *)
 {
     PRIVATE(o) = g_new(RaitDevicePrivate, 1);
     PRIVATE(o)->children = g_ptr_array_new();
@@ -308,7 +308,7 @@ rait_device_init (RaitDevice * o G_GNUC_UNUSED)
 }
 
 static void
-rait_device_class_init (RaitDeviceClass * c)
+rait_device_class_init (RaitDeviceClass * c, void *)
 {
     GObjectClass *g_object_class = (GObjectClass*) c;
     DeviceClass *device_class = (DeviceClass *)c;
@@ -502,9 +502,13 @@ static void do_unthreaded_ops(RaitDevice *self G_GNUC_UNUSED, GFunc func, GPtrAr
 
 /* This is the one that code below should call. It switches
    automatically between do_thread_pool_op and do_unthreaded_ops,
-   depending on g_thread_supported(). */
+   depending on g_thread_supported().
+
+   Apparently thread initialisation & support is guaranteed since GLib 2.32,
+   so it should be safe to just assume the answer is yes.
+*/
 static void do_rait_child_ops(RaitDevice *self, GFunc func, GPtrArray * ops) {
-    if (g_thread_supported()) {
+    if (/* g_thread_supported() */ 1) {
         do_thread_pool_op(self, func, ops);
     } else {
         do_unthreaded_ops(self, func, ops);

@@ -216,8 +216,8 @@ typedef struct {
 #define selfp (self->private)
 
 /* here are local prototypes, so we can make function pointers. */
-static void device_init (Device * o);
-static void device_class_init (DeviceClass * c);
+static void device_init (Device * o, void *);
+static void device_class_init (DeviceClass * c, void *);
 static void device_base_init (DeviceClass * c);
 
 static void simple_property_free(SimpleProperty *o);
@@ -312,7 +312,7 @@ static void device_finalize(GObject *obj_self) {
 }
 
 static void
-device_init (Device * self)
+device_init (Device * self, void *)
 {
     self->private = malloc(sizeof(DevicePrivate));
     self->device_name = NULL;
@@ -340,7 +340,7 @@ device_init (Device * self)
 }
 
 static void
-device_class_init (DeviceClass * device_class)
+device_class_init (DeviceClass * device_class, void *)
 {
     GObjectClass *g_object_class = (GObjectClass*) device_class;
 

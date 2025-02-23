@@ -571,7 +571,7 @@ xmsgsource_check(
 static gboolean
 xmsgsource_dispatch(
     GSource *source G_GNUC_UNUSED,
-    GSourceFunc callback,
+    XMsgCallback callback,
     gpointer user_data)
 {
     XMsgSource *xms = (XMsgSource *)source;
@@ -676,7 +676,8 @@ xmsgsource_new(
 	xmsgsource_funcs = g_new0(GSourceFuncs, 1);
 	xmsgsource_funcs->prepare = xmsgsource_prepare;
 	xmsgsource_funcs->check = xmsgsource_check;
-	xmsgsource_funcs->dispatch = xmsgsource_dispatch;
+	xmsgsource_funcs->dispatch =
+	    (GSourceFuncsDispatchFunc) xmsgsource_dispatch;
     }
 
     src = g_source_new(xmsgsource_funcs, sizeof(XMsgSource));

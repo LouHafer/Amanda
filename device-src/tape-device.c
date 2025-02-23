@@ -178,8 +178,8 @@ static DevicePropertyBase device_property_final_filemarks;
 static DevicePropertyBase device_property_read_buffer_size; /* old name for READ_BLOCK_SIZE */
 
 /* here are local prototypes */
-static void tape_device_init (TapeDevice * o);
-static void tape_device_class_init (TapeDeviceClass * c);
+static void tape_device_init (TapeDevice * o, void *);
+static void tape_device_class_init (TapeDeviceClass * c, void *);
 static void tape_device_base_init (TapeDeviceClass * c);
 static gboolean tape_device_set_feature_property_fn(Device *p_self, DevicePropertyBase *base,
 				    GValue *val, PropertySurety surety, PropertySource source);
@@ -244,7 +244,7 @@ GType tape_device_get_type (void)
 }
 
 static void
-tape_device_init (TapeDevice * self) {
+tape_device_init (TapeDevice * self, void *) {
     Device * d_self;
     GValue response;
 
@@ -370,7 +370,7 @@ static void tape_device_finalize(GObject * obj_self) {
 }
 
 static void
-tape_device_class_init (TapeDeviceClass * c)
+tape_device_class_init (TapeDeviceClass * c, void *)
 {
     DeviceClass *device_class = (DeviceClass *)c;
     GObjectClass *g_object_class = (GObjectClass *)c;

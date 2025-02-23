@@ -29,9 +29,6 @@
 amsemaphore_t* amsemaphore_new_with_value(int value) {
     amsemaphore_t *rval;
 
-    if (!g_thread_supported())
-        return NULL;
-
     rval = malloc(sizeof(*rval));
     rval->value = value;
     rval->mutex = g_mutex_new();

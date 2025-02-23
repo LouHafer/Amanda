@@ -52,8 +52,8 @@
 void vfs_device_register(void);
 
 /* here are local prototypes */
-static void vfs_device_init (VfsDevice * o);
-static void vfs_device_class_init (VfsDeviceClass * c);
+static void vfs_device_init (VfsDevice * o, void *);
+static void vfs_device_class_init (VfsDeviceClass * c, void *);
 static void vfs_device_base_init (VfsDeviceClass * c);
 static void vfs_device_finalize (GObject * o);
 
@@ -194,7 +194,7 @@ vfs_device_get_type (void)
 
 static void
 vfs_device_init (
-    VfsDevice *self)
+    VfsDevice *self, void *)
 {
     Device *dself = DEVICE(self);
     GValue response;
@@ -279,7 +279,7 @@ vfs_device_init (
 
 static void
 vfs_device_class_init(
-    VfsDeviceClass *c)
+    VfsDeviceClass *c, void *)
 {
     GObjectClass *g_object_class = (GObjectClass*) c;
     DeviceClass *device_class = DEVICE_CLASS(c);

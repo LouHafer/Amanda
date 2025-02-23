@@ -66,7 +66,7 @@ typedef struct {
 
 static void
 class_init(
-    XferSourceShmRingClass * selfc)
+    XferSourceShmRingClass * selfc, void *)
 {
     XferElementClass *klass = XFER_ELEMENT_CLASS(selfc);
     static xfer_element_mech_pair_t mech_pairs[] = {

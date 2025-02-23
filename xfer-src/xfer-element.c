@@ -35,7 +35,7 @@ static XferElementClass *xfer_element_class = NULL;
 
 static void
 xfer_element_init(
-    XferElement *xe)
+    XferElement *xe, void *)
 {
     xe->xfer = NULL;
     xe->output_mech = XFER_MECH_NONE;
@@ -203,7 +203,7 @@ xfer_element_finalize(
 
 static void
 xfer_element_class_init(
-    XferElementClass * klass)
+    XferElementClass * klass, void *)
 {
     GObjectClass *goc = (GObjectClass*) klass;
 

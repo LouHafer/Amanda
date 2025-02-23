@@ -122,7 +122,7 @@ source_readfd_start_impl(
 
 static void
 source_readfd_class_init(
-    XferSourceReadfdClass * klass)
+    XferSourceReadfdClass * klass, void *)
 {
     XferElementClass *xec = XFER_ELEMENT_CLASS(klass);
     static xfer_element_mech_pair_t mech_pairs[] = {
@@ -221,7 +221,7 @@ source_writefd_start_impl(
 
 static void
 source_writefd_class_init(
-    XferSourceWritefdClass * klass)
+    XferSourceWritefdClass * klass, void *)
 {
     XferElementClass *xec = XFER_ELEMENT_CLASS(klass);
     static xfer_element_mech_pair_t mech_pairs[] = {
@@ -323,7 +323,7 @@ source_push_start_impl(
 
 static void
 source_push_class_init(
-    XferSourcePushClass * klass)
+    XferSourcePushClass * klass, void *)
 {
     XferElementClass *xec = XFER_ELEMENT_CLASS(klass);
     static xfer_element_mech_pair_t mech_pairs[] = {
@@ -418,7 +418,7 @@ source_pull_setup_impl(
 
 static void
 source_pull_class_init(
-    XferSourcePullClass * klass)
+    XferSourcePullClass * klass, void *)
 {
     XferElementClass *xec = XFER_ELEMENT_CLASS(klass);
     static xfer_element_mech_pair_t mech_pairs[] = {
@@ -541,7 +541,7 @@ source_listen_start_impl(
 
 static void
 source_listen_class_init(
-    XferSourceListenClass * klass)
+    XferSourceListenClass * klass, void *)
 {
     XferElementClass *xec = XFER_ELEMENT_CLASS(klass);
     static xfer_element_mech_pair_t mech_pairs[] = {
@@ -693,7 +693,7 @@ source_connect_start_impl(
 
 static void
 source_connect_class_init(
-    XferSourceConnectClass * klass)
+    XferSourceConnectClass * klass, void *)
 {
     XferElementClass *xec = XFER_ELEMENT_CLASS(klass);
     static xfer_element_mech_pair_t mech_pairs[] = {
@@ -803,7 +803,7 @@ dest_readfd_start_impl(
 
 static void
 dest_readfd_class_init(
-    XferDestReadfdClass * klass)
+    XferDestReadfdClass * klass, void *)
 {
     XferElementClass *xec = XFER_ELEMENT_CLASS(klass);
     static xfer_element_mech_pair_t mech_pairs[] = {
@@ -924,7 +924,7 @@ dest_writefd_start_impl(
 
 static void
 dest_writefd_class_init(
-    XferDestWritefdClass * klass)
+    XferDestWritefdClass * klass, void *)
 {
     XferElementClass *xec = XFER_ELEMENT_CLASS(klass);
     static xfer_element_mech_pair_t mech_pairs[] = {
@@ -1022,7 +1022,7 @@ dest_push_setup_impl(
 
 static void
 dest_push_class_init(
-    XferDestPushClass * klass)
+    XferDestPushClass * klass, void *)
 {
     XferElementClass *xec = XFER_ELEMENT_CLASS(klass);
     static xfer_element_mech_pair_t mech_pairs[] = {
@@ -1122,7 +1122,7 @@ dest_pull_start_impl(
 
 static void
 dest_pull_class_init(
-    XferDestPullClass * klass)
+    XferDestPullClass * klass, void *)
 {
     XferElementClass *xec = XFER_ELEMENT_CLASS(klass);
     static xfer_element_mech_pair_t mech_pairs[] = {
@@ -1266,7 +1266,7 @@ dest_listen_start_impl(
 
 static void
 dest_listen_class_init(
-    XferDestListenClass * klass)
+    XferDestListenClass * klass, void *)
 {
     XferElementClass *xec = XFER_ELEMENT_CLASS(klass);
     static xfer_element_mech_pair_t mech_pairs[] = {
@@ -1388,7 +1388,7 @@ dest_connect_start_impl(
 
 static void
 dest_connect_class_init(
-    XferDestConnectClass * klass)
+    XferDestConnectClass * klass, void *)
 {
     XferElementClass *xec = XFER_ELEMENT_CLASS(klass);
     static xfer_element_mech_pair_t mech_pairs[] = {
@@ -1470,7 +1470,7 @@ test_xfer_simple(void)
 
     Xfer *xfer = xfer_new(elements, G_N_ELEMENTS(elements));
     src = xfer_get_source(xfer);
-    g_source_set_callback(src, (GSourceFunc)test_xfer_generic_callback, NULL, NULL);
+    g_source_set_callback(src, G_SOURCE_FUNC(test_xfer_generic_callback), NULL, NULL);
     g_source_attach(src, NULL);
     tu_dbg("Transfer: %s\n", xfer_repr(xfer));
 
@@ -1529,7 +1529,7 @@ test_xfer_files(gboolean add_filters)
 
     xfer = xfer_new(elements, elts);
     src = xfer_get_source(xfer);
-    g_source_set_callback(src, (GSourceFunc)test_xfer_generic_callback, NULL, NULL);
+    g_source_set_callback(src, G_SOURCE_FUNC(test_xfer_generic_callback), NULL, NULL);
     g_source_attach(src, NULL);
     tu_dbg("Transfer: %s\n", xfer_repr(xfer));
 
@@ -1589,7 +1589,7 @@ test_glue_combo(
 
     Xfer *xfer = xfer_new(elements, G_N_ELEMENTS(elements));
     src = xfer_get_source(xfer);
-    g_source_set_callback(src, (GSourceFunc)test_xfer_generic_callback, NULL, NULL);
+    g_source_set_callback(src, G_SOURCE_FUNC(test_xfer_generic_callback), NULL, NULL);
     g_source_attach(src, NULL);
 
     /* unreference the elements */

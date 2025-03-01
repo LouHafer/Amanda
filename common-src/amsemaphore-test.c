@@ -58,7 +58,7 @@ test_decr_wait(void)
 
     data.sem = amsemaphore_new_with_value(10),
 
-    th = g_thread_create(test_decr_wait_thread, (gpointer)&data, TRUE, NULL);
+    th = g_thread_new("tst_decwt_thr",test_decr_wait_thread,(gpointer)&data) ;
 
     /* sleep to give amsemaphore_decrement() a chance to block (or not). */
     g_usleep(G_USEC_PER_SEC / 4);
@@ -69,6 +69,7 @@ test_decr_wait(void)
 
     /* join the thread and see how it fared. */
     rv = GPOINTER_TO_INT(g_thread_join(th));
+    th = NULL ;
 
     amsemaphore_free(data.sem);
 
@@ -108,7 +109,7 @@ test_wait_empty(void)
     amsemaphore_t *sem = amsemaphore_new_with_value(10);
     int rv;
 
-    th = g_thread_create(test_wait_empty_thread, (gpointer)sem, TRUE, NULL);
+    th = g_thread_new("tst_empwt_thr",test_wait_empty_thread,(gpointer)sem) ;
 
     /* sleep to give amsemaphore_decrement() a chance to block (or not). */
     g_usleep(G_USEC_PER_SEC / 4);
@@ -121,6 +122,7 @@ test_wait_empty(void)
 
     /* join the thread and see how it fared. */
     rv = GPOINTER_TO_INT(g_thread_join(th));
+    th = NULL ;
 
     amsemaphore_free(sem);
 
@@ -152,7 +154,8 @@ test_force_adjust(void)
     GThread *th;
     amsemaphore_t *sem = amsemaphore_new_with_value(10);
 
-    th = g_thread_create(test_force_adjust_thread, (gpointer)sem, TRUE, NULL);
+    th = g_thread_new("tst_adj_thr",test_force_adjust_thread,
+    			 (gpointer)sem) ;
 
     /* sleep to give amsemaphore_decrement() a chance to block (or not). */
     g_usleep(G_USEC_PER_SEC / 4);
@@ -167,6 +170,7 @@ test_force_adjust(void)
     amsemaphore_force_adjust(sem, -10);
 
     g_thread_join(th);
+    th = NULL ;
 
     amsemaphore_free(sem);
 
@@ -199,7 +203,7 @@ test_force_set(void)
     GThread *th;
     amsemaphore_t *sem = amsemaphore_new_with_value(10);
 
-    th = g_thread_create(test_force_set_thread, (gpointer)sem, TRUE, NULL);
+    th = g_thread_new("tst_frc_thr",test_force_set_thread,(gpointer)sem) ;
 
     /* sleep to give amsemaphore_decrement() a chance to block (or not). */
     g_usleep(G_USEC_PER_SEC / 4);
@@ -214,6 +218,7 @@ test_force_set(void)
     amsemaphore_force_set(sem, 0);
 
     g_thread_join(th);
+    th = NULL ;
 
     amsemaphore_free(sem);
 

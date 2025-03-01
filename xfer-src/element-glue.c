@@ -1786,8 +1786,10 @@ start_impl(
 {
     XferElementGlue *self = (XferElementGlue *)elt;
 
-    if (self->need_thread)
-	self->thread = g_thread_create(worker_thread, (gpointer)self, TRUE, NULL);
+    if (self->need_thread) {
+	self->thread =
+	    g_thread_new("glu_wk_thr",worker_thread,(gpointer)self) ;
+    }
 
     /* we're active if we have a thread that will eventually die */
     return self->need_thread;
@@ -2361,6 +2363,7 @@ finalize_impl(
     /* first make sure the worker thread has finished up */
     if (self->thread)
 	g_thread_join(self->thread);
+    self->thread = NULL ;
 
     /* close our pipes and fd's if they're still open */
     if (self->pipe[0] != -1) close(self->pipe[0]);

@@ -665,29 +665,34 @@ start_backup(
 	if (!have_filter) {
 	    native_crc.out = dumpout;
 	    native_crc.shm_ring = shm_ring;
-	    native_crc.thread = g_thread_create(handle_crc_to_shm_ring_thread,
-					(gpointer)&native_crc, TRUE, NULL);
+	    native_crc.thread =
+	        g_thread_new("tar_crcshmrng",handle_crc_to_shm_ring_thread,
+			     (gpointer)&native_crc) ;
 	} else {
 	    native_crc.out = dumpout;
-	    native_crc.thread = g_thread_create(handle_crc_thread,
-					(gpointer)&native_crc, TRUE, NULL);
+	    native_crc.thread =
+	        g_thread_new("tar_crcnat",handle_crc_thread,
+			     (gpointer)&native_crc) ;
 	    client_crc.in  = client_pipe[0];
 	    client_crc.out = dataf;
 	    client_crc.shm_ring = shm_ring;
-	    client_crc.thread = g_thread_create(handle_crc_to_shm_ring_thread,
-					(gpointer)&client_crc, TRUE, NULL);
+	    client_crc.thread =
+	        g_thread_new("tar_crcshmcl",handle_crc_to_shm_ring_thread,
+			     (gpointer)&client_crc) ;
 	}
     } else {
 	native_crc.in  = native_pipe[0];
 	native_crc.out = dumpout;
-	native_crc.thread = g_thread_create(handle_crc_thread,
-					(gpointer)&native_crc, TRUE, NULL);
+	native_crc.thread =
+	    g_thread_new("tar_crcnat",handle_crc_thread,
+			 (gpointer)&native_crc) ;
 
 	if (have_filter) {
 	    client_crc.in  = client_pipe[0];
 	    client_crc.out = dataf;
-	    client_crc.thread = g_thread_create(handle_crc_thread,
-					(gpointer)&client_crc, TRUE, NULL);
+	    client_crc.thread =
+	        g_thread_new("tar_crccl",handle_crc_thread,
+			     (gpointer)&client_crc) ;
 	}
     }
 }

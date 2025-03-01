@@ -313,7 +313,8 @@ test_intra_proc_locking(void)
 
     thd_fds[0] = outpipe[0];
     thd_fds[1] = inpipe[1];
-    thd = g_thread_create((GThreadFunc)test_intra_proc_locking_thd, (gpointer)thd_fds, TRUE, NULL);
+    thd = g_thread_new("tst_lck_thr",(GThreadFunc)test_intra_proc_locking_thd,
+    		       (gpointer)thd_fds) ;
 
     rv = locking_master(inpipe[0], outpipe[1]);
 
@@ -321,6 +322,7 @@ test_intra_proc_locking(void)
      * the slave if it's still running */
     close(outpipe[1]);
     g_thread_join(thd);
+    thd = NULL ;
     unlink(TEST_FILENAME);
 
     /* caller will kill the remaining files */

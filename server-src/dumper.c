@@ -1647,8 +1647,9 @@ do_dump(
 		shm_ring_direct = NULL;
 		shm_thread_mutex = g_mutex_new();
 		shm_thread_cond  = g_cond_new();
-		shm_thread = g_thread_create(handle_shm_ring_direct,
-				(gpointer)db, TRUE, NULL);
+		shm_thread =
+		    g_thread_new("shm_rg_dir_thr",handle_shm_ring_direct,
+				 (gpointer)db) ;
 	    } else {
 		// stream to shm_ring
 		db->shm_ring_producer = shm_ring_link(shm_name);
@@ -1672,8 +1673,9 @@ do_dump(
 					   NETWORK_BLOCK_BYTES);
 		shm_thread_mutex = g_mutex_new();
 		shm_thread_cond  = g_cond_new();
-		shm_thread = g_thread_create(handle_shm_ring_to_fd_thread,
-				(gpointer)db, TRUE, NULL);
+		shm_thread =
+		    g_thread_new("shm_rg_fd_thr",handle_shm_ring_to_fd_thread,
+				 (gpointer)db) ;
 	    } else {
 		// stream to fd
 	    }

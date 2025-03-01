@@ -1014,7 +1014,9 @@ device_thread(
 
     if (self->disk_cache_dirname) {
         GError *error = NULL;
-	self->disk_cache_thread = g_thread_create(disk_cache_thread, (gpointer)self, TRUE, &error);
+	self->disk_cache_thread =
+	    g_thread_try_new("disk_cache_thread",disk_cache_thread,
+	    		     (gpointer)self,&error);
         if (!self->disk_cache_thread) {
             g_critical(_("Error creating new thread: %s (%s)"),
                 error->message, errno? strerror(errno) : _("no error code"));
@@ -1060,8 +1062,11 @@ device_thread(
     g_mutex_unlock(self->state_mutex);
 
     /* make sure the other thread is done before we send XMSG_DONE */
-    if (self->disk_cache_thread)
-        g_thread_join(self->disk_cache_thread);
+    if (self->disk_cache_thread) {
+      g_thread_join(self->disk_cache_thread);
+      self->disk_cache_thread = NULL ;
+    }
+
 
     g_debug("sending XMSG_CRC message");
     g_debug("xfer-dest-taper-cacher CRC %08x      size %lld",
@@ -1229,7 +1234,9 @@ start_impl(
     XferDestTaperCacher *self = (XferDestTaperCacher *)elt;
     GError *error = NULL;
 
-    self->device_thread = g_thread_create(device_thread, (gpointer)self, FALSE, &error);
+    self->device_thread =
+        g_thread_try_new("device_thread",device_thread,
+			 (gpointer)self,&error);
     if (!self->device_thread) {
         g_critical(_("Error creating new thread: %s (%s)"),
             error->message, errno? strerror(errno) : _("no error code"));

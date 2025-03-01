@@ -1245,14 +1245,15 @@ accept_impl(
 	 * until the mover is active.  So we have to poll, waiting for ACTIVE.
 	 * This is ugly. */
 
-	wait_thread = g_thread_create(accept_wait_cond, (gpointer)self, TRUE,
-				      NULL);
+	wait_thread =
+	    g_thread_new("dirtcp_wt_thr",accept_wait_cond,(gpointer)self) ;
 	while (!*cancelled && !self->cancel) {
 	    g_cond_wait(self->abort_cond, self->abort_mutex);
 	}
 	self->cancel = TRUE;
 	g_mutex_unlock(self->abort_mutex);
 	state = GPOINTER_TO_INT(g_thread_join(wait_thread));
+	wait_thread = NULL ;
 	g_mutex_lock(self->abort_mutex);
 
 	if (*cancelled) {

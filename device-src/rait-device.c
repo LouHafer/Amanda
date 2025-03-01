@@ -279,6 +279,7 @@ rait_device_finalize(GObject *obj_self)
 
 		/* and wait for it to die, which should happen soon */
 		g_thread_join(inf->thread);
+		inf->thread = NULL ;
 	    }
 
 	    if (inf->mutex)
@@ -460,7 +461,8 @@ static void do_thread_pool_op(RaitDevice *self, GFunc func, GPtrArray * ops) {
 	    inf->mutex = g_mutex_new();
 	    inf->cond = g_cond_new();
 	    inf->private = PRIVATE(self);
-	    inf->thread = g_thread_create(rait_thread_pool_func, inf, TRUE, NULL);
+	    inf->thread =
+	        g_thread_new("rait_pool_thr",rait_thread_pool_func,inf) ;
 	}
 
 	/* set up the info the thread needs and trigger it to start */

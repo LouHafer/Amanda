@@ -2353,6 +2353,7 @@ writer_intermediary(
 
     if (native_crc.thread) {
 	g_thread_join(native_crc.thread);
+	native_crc.thread = NULL ;
     }
 
     if (!ctl_data.file.encrypted && !ctl_data.file.compressed) {
@@ -3540,8 +3541,9 @@ start_processing_data(
         native_crc.out = ctl_data->crc_pipe[1];
 	crc32_init(&native_crc.crc);
 	ctl_data->child_in[0] = ctl_data->crc_pipe[0];
-	native_crc.thread = g_thread_create(handle_crc_thread,
-                                 (gpointer)&native_crc, TRUE, NULL);
+	native_crc.thread =
+	    g_thread_new("hdl_crc_thr",handle_crc_thread,
+	    		 (gpointer)&native_crc) ;
     } else {
 	native_crc.thread = NULL;
     }

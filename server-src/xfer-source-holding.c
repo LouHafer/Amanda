@@ -593,11 +593,17 @@ start_impl(
     GError *error = NULL;
 
     if (elt->output_mech == XFER_MECH_MEM_RING) {
-	self->holding_thread = g_thread_create(holding_thread, (gpointer)self, FALSE, &error);
+	self->holding_thread =
+	    g_thread_try_new("xf_mech_thr",holding_thread,
+	    		     (gpointer)self,&error);
 	if (!self->holding_thread) {
             g_critical(_("Error creating new thread: %s (%s)"),
 	            error->message, errno? strerror(errno) : _("no error code"));
+	} else {
+	  g_thread_unref(self->holding_thread) ;
+	  self->holding_thread = NULL ;
 	}
+
 	return TRUE;
     }
 

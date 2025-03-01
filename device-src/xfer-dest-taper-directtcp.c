@@ -319,10 +319,14 @@ start_impl(
     self->paused = TRUE;
 
     /* start up the thread */
-    self->worker_thread = g_thread_create(worker_thread, (gpointer)self, TRUE, &error);
+    self->worker_thread =
+        g_thread_try_new("xditcp_wk_thr",worker_thread,(gpointer)self,&error);
     if (!self->worker_thread) {
 	g_critical(_("Error creating new thread: %s (%s)"),
 	    error->message, errno? strerror(errno) : _("no error code"));
+    } else {
+      g_thread_unref(self->worker_thread) ;
+      self->worker_thread = NULL ;
     }
 
     return TRUE;

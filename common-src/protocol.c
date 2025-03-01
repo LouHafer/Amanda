@@ -235,7 +235,8 @@ protocol_sendreq(
 	 security_driver == &ssh_security_driver ||
 #endif
 	 0)) {
-	g_thread_create(connect_thread, (gpointer)p, TRUE, NULL);
+	g_thread_unref(
+	    g_thread_new("drv_con_thr",connect_thread,(gpointer)p)) ;
 	g_mutex_lock(protocol_mutex);
 	nb_thread++;
 	g_mutex_unlock(protocol_mutex);
@@ -373,7 +374,8 @@ connect_wait_callback(
 	 p->security_driver == &ssh_security_driver ||
 #endif
 	 0) {
-	g_thread_create(connect_thread, (gpointer)p, TRUE, NULL);
+	g_thread_unref(
+	    g_thread_new("con_wait_thr",connect_thread,(gpointer)p)) ;
 	g_mutex_lock(protocol_mutex);
 	nb_thread++;
 	g_mutex_unlock(protocol_mutex);

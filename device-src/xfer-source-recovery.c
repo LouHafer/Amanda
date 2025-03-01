@@ -356,11 +356,19 @@ start_impl(
 
     if (elt->output_mech == XFER_MECH_DIRECTTCP_CONNECT) {
 	g_assert(elt->output_listen_addrs != NULL);
-	self->thread = g_thread_create(directtcp_connect_thread, (gpointer)self, FALSE, NULL);
+	self->thread =
+	    g_thread_new("dirtcp_con_thr",directtcp_connect_thread,
+	  		 (gpointer)self) ;
+	g_thread_unref(self->thread) ;
+	self->thread = NULL ;
 	return TRUE; /* we'll send XMSG_DONE */
     } else if (elt->output_mech == XFER_MECH_DIRECTTCP_LISTEN) {
 	g_assert(elt->output_listen_addrs == NULL);
-	self->thread = g_thread_create(directtcp_listen_thread, (gpointer)self, FALSE, NULL);
+	self->thread =
+	    g_thread_new("dirtcp_lis_thr",directtcp_listen_thread,
+	    		 (gpointer)self) ;
+	    g_thread_unref(self->thread) ;
+	    self->thread = NULL ;
 	return TRUE; /* we'll send XMSG_DONE */
     } else {
 	/* nothing to prepare for - we're ready already! */

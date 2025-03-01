@@ -102,7 +102,7 @@ typedef struct XferDestTaperSplitter {
     /* Element State
      *
      * "state" includes all of the variables below (including device
-     * parameters).  Note that the device_thread holdes this mutex for the
+     * parameters).  Note that the device_thread holds this mutex for the
      * entire duration of writing a part.
      *
      * state_mutex should always be locked before mem_ring->mutex, if both are to be
@@ -883,10 +883,14 @@ start_impl(
     XferDestTaperSplitter *self = (XferDestTaperSplitter *)elt;
     GError *error = NULL;
 
-    self->device_thread = g_thread_create(device_thread, (gpointer)self, FALSE, &error);
+    self->device_thread =
+        g_thread_try_new("xdsttapsplt",device_thread,(gpointer)self,&error);
     if (!self->device_thread) {
         g_critical(_("Error creating new thread: %s (%s)"),
             error->message, errno? strerror(errno) : _("no error code"));
+    } else {
+      g_thread_unref(self->device_thread) ;
+      self->device_thread = NULL ;
     }
 
     return TRUE;

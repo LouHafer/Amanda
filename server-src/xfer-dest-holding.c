@@ -74,7 +74,7 @@ typedef struct XferDestHolding {
     /* Element State
      *
      * "state" includes all of the variables below (including holding
-     * parameters).  Note that the holding_thread holdes this mutex for the
+     * parameters).  Note that the holding_thread holds this mutex for the
      * entire duration of writing a chunk.
      *
      * state_mutex should always be locked before mem_ring->mutex, if both are to be
@@ -829,13 +829,20 @@ start_impl(
     GError *error = NULL;
 
     if (elt->input_mech == XFER_MECH_SHM_RING) {
-        self->holding_thread = g_thread_create(shm_holding_thread, (gpointer)self, FALSE, &error);
+        self->holding_thread =
+	    g_thread_try_new("shm_hd_thr",shm_holding_thread,
+	    		     (gpointer)self,&error);
     } else {
-        self->holding_thread = g_thread_create(holding_thread, (gpointer)self, FALSE, &error);
+        self->holding_thread =
+	    g_thread_try_new("hd_thr",holding_thread,
+	    		     (gpointer)self,&error);
     }
     if (!self->holding_thread) {
         g_critical(_("Error creating new thread: %s (%s)"),
             error->message, errno? strerror(errno) : _("no error code"));
+    } else {
+      g_thread_unref(self->holding_thread) ;
+      self->holding_thread = NULL ;
     }
 
     return TRUE;

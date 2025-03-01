@@ -203,8 +203,8 @@ ndma_daemon_session (struct ndm_session *sess, int port, int is_test_daemon)
 
 	    /* and exit when our stdin goes away */
 	    g_debug("will exit on EOF from stdin");
-	    g_thread_init(NULL);
-	    g_thread_create(exit_on_stdin_eof_thread, NULL, FALSE, NULL);
+	    g_thread_unref(
+		g_thread_new("ex_eof_thr",exit_on_stdin_eof_thread,NULL)) ;
 	}
 
 	for (;;) {

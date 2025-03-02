@@ -39,7 +39,7 @@ static GObjectClass *parent_class = NULL;
 /* and equipment to ensure we only talk to ndmlib in one thread at a time, even
  * using multiple connections.  The ndmlib code is not necessarily reentrant,
  * so this is better safe than sorry. */
-static GStaticMutex ndmlib_mutex = G_STATIC_MUTEX_INIT;
+static GMutex ndmlib_mutex ;
 
 /* macros like those in ndmlib.h, but designed for use in this class */
 /* (copied from ndmp-src/ndmlib.h; see that file for copyright and license) */
@@ -54,7 +54,7 @@ static GStaticMutex ndmlib_mutex = G_STATIC_MUTEX_INIT;
 	NDMOS_MACRO_ZEROFILL (xa); \
 	xa->request.protocol_version = NDMP4VER; \
 	xa->request.header.message = (ndmp0_message) MT_##TYPE; \
-	g_static_mutex_lock(&ndmlib_mutex); \
+	g_mutex_lock(&ndmlib_mutex); \
      {
 
 #define NDMP_TRANS_NO_REQUEST(SELF, TYPE) \
@@ -65,7 +65,7 @@ static GStaticMutex ndmlib_mutex = G_STATIC_MUTEX_INIT;
 	NDMOS_MACRO_ZEROFILL (xa); \
 	xa->request.protocol_version = NDMP4VER; \
 	xa->request.header.message = (ndmp0_message) MT_##TYPE; \
-	g_static_mutex_lock(&ndmlib_mutex); \
+	g_mutex_lock(&ndmlib_mutex); \
      {
 
 #define NDMP_CALL(SELF) \
@@ -73,7 +73,7 @@ static GStaticMutex ndmlib_mutex = G_STATIC_MUTEX_INIT;
 	(SELF)->last_rc = (*(SELF)->conn->call)((SELF)->conn, xa); \
 	if ((SELF)->last_rc) { \
 	    NDMP_FREE(); \
-	    g_static_mutex_unlock(&ndmlib_mutex); \
+	    g_mutex_unlock(&ndmlib_mutex); \
 	    return FALSE; \
 	} \
     } while (0);
@@ -81,7 +81,7 @@ static GStaticMutex ndmlib_mutex = G_STATIC_MUTEX_INIT;
 #define NDMP_FREE() ndmconn_free_nmb(NULL, &xa->reply)
 
 #define NDMP_END \
-	g_static_mutex_unlock(&ndmlib_mutex); \
+	g_mutex_unlock(&ndmlib_mutex); \
     } }
 
 /*
@@ -260,13 +260,13 @@ ndmp_connection_scsi_execute_cdb(
 	if (actual_datain_len)
 	    *actual_datain_len = reply->datain.datain_len;
 	if (datain_max_len && datain)
-	    g_memmove(datain, reply->datain.datain_val, reply->datain.datain_len);
+	    memmove(datain, reply->datain.datain_val, reply->datain.datain_len);
 
 	reply->ext_sense.ext_sense_len = MIN(ext_sense_max_len, reply->ext_sense.ext_sense_len);
 	if (actual_ext_sense_len)
 	    *actual_ext_sense_len = reply->ext_sense.ext_sense_len;
 	if (ext_sense_max_len && ext_sense)
-	    g_memmove(ext_sense, reply->ext_sense.ext_sense_val, reply->ext_sense.ext_sense_len);
+	    memmove(ext_sense, reply->ext_sense.ext_sense_val, reply->ext_sense.ext_sense_len);
 
 	NDMP_FREE();
     NDMP_END
@@ -358,7 +358,7 @@ ndmp_connection_tape_read(
 	request->count = count;
 	NDMP_CALL(self);
 	*out_count = reply->data_in.data_in_len;
-	g_memmove(buf, reply->data_in.data_in_val, *out_count);
+	memmove(buf, reply->data_in.data_in_val, *out_count);
 	NDMP_FREE();
     NDMP_END
     return TRUE;
@@ -726,11 +726,11 @@ ndmp_connection_wait_for_notify(
 	/* fall on through, blind to any errors - presumably the same error
 	 * condition will be caught by ndmconn_recv_nmb. */
 
-	g_static_mutex_lock(&ndmlib_mutex);
+	g_mutex_lock(&ndmlib_mutex);
 	NDMOS_MACRO_ZEROFILL(&nmb);
 	nmb.protocol_version = NDMP4VER;
 	self->last_rc = ndmconn_recv_nmb(self->conn, &nmb);
-	g_static_mutex_unlock(&ndmlib_mutex);
+	g_mutex_unlock(&ndmlib_mutex);
 
 	if (self->last_rc) {
 	    /* (nothing to free) */
@@ -756,7 +756,7 @@ typedef struct notify_data_s {
 
 static void handle_notify(void *cookie);
 
-static GStaticMutex notify_mutex = G_STATIC_MUTEX_INIT;
+static GMutex notify_mutex ;
 static notify_data_t **notify_data = NULL;
 static int nb_notify_data = 0;
 int
@@ -776,7 +776,7 @@ ndmp_connection_wait_for_notify_with_cond(
     int status;
     int i;
 
-    g_static_mutex_lock(&notify_mutex);
+    g_mutex_lock(&notify_mutex);
     if (notify_data == NULL) {
 	glib_init();
         nb_notify_data = 10;
@@ -812,7 +812,7 @@ ndmp_connection_wait_for_notify_with_cond(
     ndata->abort_cond = abort_cond;
     ndata->status = 2;
     ndata->in_use = 1;
-    g_static_mutex_unlock(&notify_mutex);
+    g_mutex_unlock(&notify_mutex);
 
     g_assert(!self->startup_err);
 
@@ -866,7 +866,7 @@ ndmp_connection_wait_for_notify_with_cond(
     while (!*cancelled && ndata->status == 2) {
 	g_cond_wait(abort_cond, abort_mutex);
     }
-    g_static_mutex_lock(&notify_mutex);
+    g_mutex_lock(&notify_mutex);
 
     if (ndata->read_event) {
 	event_release(ndata->read_event);
@@ -880,7 +880,7 @@ ndmp_connection_wait_for_notify_with_cond(
     ndata->in_use++;
     if (ndata->in_use == 3)
 	ndata->in_use = 0;
-    g_static_mutex_unlock(&notify_mutex);
+    g_mutex_unlock(&notify_mutex);
     return status;
 
 }
@@ -896,11 +896,11 @@ handle_notify(void *cookie)
 
     g_mutex_lock(abort_mutex);
 
-    g_static_mutex_lock(&ndmlib_mutex);
+    g_mutex_lock(&ndmlib_mutex);
     NDMOS_MACRO_ZEROFILL(&nmb);
     nmb.protocol_version = NDMP4VER;
     ndata->self->last_rc = ndmconn_recv_nmb(ndata->self->conn, &nmb);
-    g_static_mutex_unlock(&ndmlib_mutex);
+    g_mutex_unlock(&ndmlib_mutex);
 
     if (ndata->self->last_rc) {
 	/* (nothing to free) */
@@ -935,11 +935,11 @@ handle_notify(void *cookie)
     }
 
     if (!found) {
-        g_static_mutex_lock(&notify_mutex);
+        g_mutex_lock(&notify_mutex);
         if (ndata->in_use == 2) {
             goto notify_done_locked;
 	}
-        g_static_mutex_unlock(&notify_mutex);
+        g_mutex_unlock(&notify_mutex);
 
 	g_mutex_unlock(abort_mutex);
 	return;
@@ -947,7 +947,7 @@ handle_notify(void *cookie)
 
     ndata->status = 0;
 notify_done:
-    g_static_mutex_lock(&notify_mutex);
+    g_mutex_lock(&notify_mutex);
 notify_done_locked:
     if (ndata->read_event) {
         event_release(ndata->read_event);
@@ -956,7 +956,7 @@ notify_done_locked:
     ndata->in_use++;
     if (ndata->in_use == 3)
         ndata->in_use = 0;
-    g_static_mutex_unlock(&notify_mutex);
+    g_mutex_unlock(&notify_mutex);
 
     g_cond_broadcast(abort_cond);
     g_mutex_unlock(abort_mutex);
@@ -1020,7 +1020,7 @@ ndmp_connection_new(
     struct ndmconn *conn = NULL;
     int rc;
     static int next_connid = 1;
-    static GStaticMutex next_connid_mutex = G_STATIC_MUTEX_INIT;
+    static GMutex next_connid_mutex ;
 
     conn = ndmconn_initialize(NULL, "amanda-server");
     if (!conn) {
@@ -1067,9 +1067,9 @@ ndmp_connection_new(
 
     self = NDMP_CONNECTION(g_object_new(TYPE_NDMP_CONNECTION, NULL));
     self->conn = conn;
-    g_static_mutex_lock(&next_connid_mutex);
+    g_mutex_lock(&next_connid_mutex);
     self->connid = next_connid++;
-    g_static_mutex_unlock(&next_connid_mutex);
+    g_mutex_unlock(&next_connid_mutex);
     conn->context = (void *)self;
     g_debug("opening new NDMPConnection #%d: to %s:%d", self->connid, hostname, port);
     return self;

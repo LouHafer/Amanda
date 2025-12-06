@@ -45,6 +45,7 @@
 #include "ammessage.h"
 
 GMutex *priv_mutex = NULL;
+
 static int make_socket(sa_family_t family);
 static int connect_port(sockaddr_union *addrp, in_port_t port, char *proto,
 			sockaddr_union *svaddr, int nonblock, int priv,
@@ -2523,7 +2524,7 @@ get_platform_and_distro(
 		goto return_platorm;
 	    }
 	} else if (strlen(uname) >= 3 &&
-		   g_strcasecmp(uname+strlen(uname)-3, "bsd") == 0) {
+		   g_ascii_strcasecmp(uname+strlen(uname)-3, "bsd") == 0) {
 	    distro = uname;
 	    argv_ptr = g_ptr_array_new();
 	    g_ptr_array_add(argv_ptr, UNAME_PATH);

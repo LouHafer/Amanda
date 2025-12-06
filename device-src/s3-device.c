@@ -2636,7 +2636,7 @@ setup_handle(S3Device * self) {
 
     if (self->s3_api == S3_API_UNKNOWN) {
 	if (self->host && strlen(self->host) > 14 &&
-	    g_strncasecmp(self->host+strlen(self->host)-14, ".amazonaws.com", 14) == 0) {
+	    g_ascii_strncasecmp(self->host+strlen(self->host)-14, ".amazonaws.com", 14) == 0) {
 	    self->s3_api = S3_API_AWS4;
 	} else {
 	    self->s3_api = S3_API_S3;

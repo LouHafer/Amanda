@@ -157,8 +157,12 @@ AC_DEFUN([AMANDA_CHECK_GLIB], [
 		;;
 	esac
 
-	AM_PATH_GLIB_2_0(2.2.0,,[
-	    AC_MSG_ERROR(glib not found or too old; See http://wiki.zmanda.com/index.php/Installation for help)
+# Was 2.2.0, which is waaaaay old. Updated code assumes at least 2.36.0. We
+# need 2.32 for changes to the thread and mutex API changed. 2.36 is where the
+# type system initialisation becomes automatic.
+
+	AM_PATH_GLIB_2_0(2.36.0,,[
+	    AC_MSG_ERROR(glib not found or too old. Must be 2.36.0 or better.)
 	], gmodule gobject gthread)
     else
         # Confirm that all GLIB_ variables are set
@@ -174,9 +178,9 @@ AC_DEFUN([AMANDA_CHECK_GLIB], [
     fi
 
     # remove deprecated warning for newer version
-    if $PKG_CONFIG --atleast-version 2.30.0 glib-2.0; then
-	AMANDA_DISABLE_GCC_WARNING(deprecated-declarations)
-    fi
+    # if $PKG_CONFIG --atleast-version 2.30.0 glib-2.0; then
+    #   AMANDA_DISABLE_GCC_WARNING(deprecated-declarations)
+    # fi
 
     # GLIB_CPPFLAGS is not set by autoconf, yet GLIB_CFLAGS contains what GLIB_CPPFLAGS should contain.
     AMANDA_ADD_CPPFLAGS($GLIB_CFLAGS)

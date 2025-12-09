@@ -29,6 +29,7 @@
 
 typedef struct {
     int value;
+    GMutex mutex_obj ;
     GMutex *mutex;
     GCond * decrement_cond;
     GCond * zero_cond;

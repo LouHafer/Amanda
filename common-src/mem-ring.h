@@ -47,6 +47,7 @@ typedef struct mem_ring_s {
     uint64_t ring_size;
     GCond   *add_cond;		/* some data was added to the ring */
     GCond   *free_cond;		/* some data was freed from the ring */
+    GMutex   mutex_obj ;
     GMutex  *mutex;
     size_t   consumer_block_size;
     size_t   producer_block_size;

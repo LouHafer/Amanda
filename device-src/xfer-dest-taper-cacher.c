@@ -141,7 +141,10 @@ typedef struct XferDestTaperCacher {
      * Any thread waiting on either condition variable should also check
      * elt->cancelled, and act appropriately if awakened in a cancelled state.
      */
-    GMutex *slab_mutex; GCond *slab_cond; GCond *slab_free_cond;
+    GMutex slab_mutex_obj ;
+    GMutex *slab_mutex;
+    GCond *slab_cond;
+    GCond *slab_free_cond;
 
     /* slabs in progress by each thread, or NULL if the thread is waiting on
      * slab_cond.  These can only be changed by their respective threads, except
@@ -186,6 +189,7 @@ typedef struct XferDestTaperCacher {
      * Any thread waiting on this condition variable should also check
      * elt->cancelled, and act appropriately if awakened in a cancelled state.
      */
+    GMutex state_mutex_obj ;
     GMutex *state_mutex;
     GCond *state_cond;
     volatile gboolean paused;
@@ -224,7 +228,7 @@ typedef struct XferDestTaperCacher {
      * it is nonzero, at which point all of the dependent fields will have
      * their correct values.  Note that, since this value never changes after
      * it has been set, it is safe to read block_size without acquiring the
-     * mutext first. */
+     * mutex first. */
 
     /* this device's need for streaming */
     StreamingRequirement streaming;
@@ -1377,9 +1381,11 @@ instance_init(
     XferDestTaperCacher *self = XFER_DEST_TAPER_CACHER(elt);
     elt->can_generate_eof = FALSE;
 
-    self->state_mutex = g_mutex_new();
+    self->state_mutex = &self->state_mutex_obj ;
+    g_mutex_init(self->state_mutex) ;
     self->state_cond = g_cond_new();
-    self->slab_mutex = g_mutex_new();
+    self->slab_mutex = &self->slab_mutex_obj ;
+    g_mutex_init(self->slab_mutex) ;
     self->slab_cond = g_cond_new();
     self->slab_free_cond = g_cond_new();
 
@@ -1401,10 +1407,12 @@ finalize_impl(
     if (self->disk_cache_dirname)
 	g_free(self->disk_cache_dirname);
 
-    g_mutex_free(self->state_mutex);
+    g_mutex_clear(self->state_mutex);
+    self->state_mutex = NULL ;
     g_cond_free(self->state_cond);
 
-    g_mutex_free(self->slab_mutex);
+    g_mutex_clear(self->slab_mutex);
+    self->slab_mutex = NULL ;
     g_cond_free(self->slab_cond);
     g_cond_free(self->slab_free_cond);
 

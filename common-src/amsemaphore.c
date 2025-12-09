@@ -31,7 +31,8 @@ amsemaphore_t* amsemaphore_new_with_value(int value) {
 
     rval = malloc(sizeof(*rval));
     rval->value = value;
-    rval->mutex = g_mutex_new();
+    rval->mutex = &rval->mutex_obj ;
+    g_mutex_init(rval->mutex) ;
     rval->decrement_cond = g_cond_new();
     rval->zero_cond = g_cond_new();
     
@@ -45,7 +46,8 @@ amsemaphore_t* amsemaphore_new_with_value(int value) {
 }
 
 void amsemaphore_free(amsemaphore_t* o) {
-    g_mutex_free(o->mutex);
+    g_mutex_clear(o->mutex);
+    o->mutex = NULL ;
     g_cond_free(o->decrement_cond);
     g_cond_free(o->zero_cond);
     free(o);

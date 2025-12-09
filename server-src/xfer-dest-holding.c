@@ -80,6 +80,7 @@ typedef struct XferDestHolding {
      * state_mutex should always be locked before mem_ring->mutex, if both are to be
      * held simultaneously.
      */
+    GMutex      state_mutex_obj ;
     GMutex     *state_mutex;
     GCond      *state_cond;
     gboolean    paused;
@@ -1015,7 +1016,8 @@ instance_init(
     XferDestHolding *self = XFER_DEST_HOLDING(elt);
     elt->can_generate_eof = FALSE;
 
-    self->state_mutex = g_mutex_new();
+    self->state_mutex = &self->state_mutex_obj ;
+    g_mutex_init(self->state_mutex) ;
     self->state_cond = g_cond_new();
 
     self->fd = -1;
@@ -1048,7 +1050,8 @@ finalize_impl(
     XferDestHolding *self = XFER_DEST_HOLDING(obj_self);
     XferElement *elt = XFER_ELEMENT(self);
 
-    g_mutex_free(self->state_mutex);
+    g_mutex_clear(self->state_mutex);
+    self->state_mutex = NULL ;
     g_cond_free(self->state_cond);
 
     if (elt->shm_ring) {

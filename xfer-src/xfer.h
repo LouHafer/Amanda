@@ -64,6 +64,7 @@ typedef struct Xfer {
 
     /* lock this while checking status in a thread
      * other than the main thread */
+    GMutex status_mutex_obj ;
     GMutex *status_mutex;
 
     /* and wait on this for status changes */
@@ -91,6 +92,7 @@ typedef struct Xfer {
 
     /* Used to coordinate handing off file descriptors among elements of this
      * xfer */
+    GMutex fd_mutex_obj ;
     GMutex *fd_mutex;
 
     int cancelled;

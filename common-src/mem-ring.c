@@ -58,7 +58,8 @@ create_mem_ring(void)
 {
     mem_ring_t *mem_ring = g_new0(mem_ring_t, 1);
 
-    mem_ring->mutex = g_mutex_new();
+    mem_ring->mutex = &mem_ring->mutex_obj ;
+    g_mutex_init(mem_ring->mutex) ;
     mem_ring->add_cond = g_cond_new();
     mem_ring->free_cond = g_cond_new();
     mem_ring->write_offset = 0;
@@ -149,7 +150,7 @@ void
 close_mem_ring(
     mem_ring_t *mem_ring)
 {
-    g_mutex_free(mem_ring->mutex);
+    g_mutex_clear(mem_ring->mutex);
     g_cond_free(mem_ring->add_cond);
     g_cond_free(mem_ring->free_cond);
     g_free(mem_ring->buffer);

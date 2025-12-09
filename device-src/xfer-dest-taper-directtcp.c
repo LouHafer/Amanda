@@ -55,6 +55,7 @@ typedef struct XferDestTaperDirectTCP {
     GThread *worker_thread;
 
     /* state (governs everything below) */
+    GMutex state_mutex_obj ;
     GMutex *state_mutex;
 
     /* part parameters */
@@ -437,7 +438,8 @@ instance_init(
     self->worker_thread = NULL;
     self->paused = TRUE;
     self->conn = NULL;
-    self->state_mutex = g_mutex_new();
+    self->state_mutex = &self->state_mutex_obj ;
+    g_mutex_init(self->state_mutex) ;
     self->paused_cond = g_cond_new();
     self->abort_cond = g_cond_new();
 }
@@ -460,7 +462,8 @@ finalize_impl(
 	g_object_unref(self->device);
     self->device = NULL;
 
-    g_mutex_free(self->state_mutex);
+    g_mutex_clear(self->state_mutex);
+    self->state_mutex = NULL ;
     g_cond_free(self->paused_cond);
     g_cond_free(self->abort_cond);
 

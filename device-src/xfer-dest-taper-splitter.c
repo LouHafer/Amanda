@@ -94,6 +94,7 @@ typedef struct XferDestTaperSplitter {
     GThread *device_thread;
 
     /* Ring Buffer */
+    GMutex ring_mutex_obj ;
     GMutex *ring_mutex;
     GCond *ring_cond;
     mem_ring_t *mem_ring;
@@ -108,6 +109,7 @@ typedef struct XferDestTaperSplitter {
      * state_mutex should always be locked before mem_ring->mutex, if both are to be
      * held simultaneously.
      */
+    GMutex state_mutex_obj ;
     GMutex *state_mutex;
     GCond *state_cond;
     volatile gboolean paused;
@@ -141,6 +143,7 @@ typedef struct XferDestTaperSplitter {
      * freeing any leftover slices. Take the part_slices mutex while modifying
      * the links in this list. */
     FileSlice *part_slices;
+    GMutex part_slices_mutex_obj ;
     GMutex *part_slices_mutex;
 
     crc_t crc_before_part;
@@ -1109,11 +1112,14 @@ instance_init(
     XferDestTaperSplitter *self = XFER_DEST_TAPER_SPLITTER(elt);
     elt->can_generate_eof = FALSE;
 
-    self->ring_mutex = g_mutex_new();
+    self->ring_mutex = &self->ring_mutex_obj ;
+    g_mutex_init(self->ring_mutex) ;
     self->ring_cond = g_cond_new();
-    self->state_mutex = g_mutex_new();
+    self->state_mutex = &self->state_mutex_obj ;
+    g_mutex_init(self->state_mutex) ;
     self->state_cond = g_cond_new();
-    self->part_slices_mutex = g_mutex_new();
+    self->part_slices_mutex = &self->part_slices_mutex_obj ;
+    g_mutex_init(self->part_slices_mutex) ;
 
     self->device = NULL;
     self->paused = TRUE;
@@ -1143,15 +1149,24 @@ finalize_impl(
     XferElement *elt = XFER_ELEMENT(self);
     FileSlice *slice, *next_slice;
 
-    g_mutex_free(self->ring_mutex);
+    g_mutex_clear(self->ring_mutex);
+    self->ring_mutex = NULL ;
     g_cond_free(self->ring_cond);
-    g_mutex_free(self->state_mutex);
+    g_mutex_clear(self->state_mutex);
+    self->state_mutex = NULL ;
     g_cond_free(self->state_cond);
 
+/*
     if (self->mem_ring) {
 	g_mutex_free(self->mem_ring->mutex);
 	g_cond_free(self->mem_ring->add_cond);
 	g_cond_free(self->mem_ring->free_cond);
+    }
+*/
+
+    if (self->mem_ring) {
+      close_mem_ring(self->mem_ring) ;
+      self->mem_ring = NULL ;
     }
 
     if (elt->shm_ring) {
@@ -1159,7 +1174,8 @@ finalize_impl(
 	elt->shm_ring = NULL;
     }
 
-    g_mutex_free(self->part_slices_mutex);
+    g_mutex_clear(self->part_slices_mutex);
+    self->part_slices_mutex = NULL ;
 
     for (slice = self->part_slices; slice; slice = next_slice) {
 	next_slice = slice->next;
@@ -1167,10 +1183,10 @@ finalize_impl(
 	    g_free(slice->filename);
 	g_free(slice);
     }
-
+/*
     if (self->mem_ring && self->mem_ring->buffer)
 	g_free(self->mem_ring->buffer);
-
+*/
     if (self->part_header)
 	dumpfile_free(self->part_header);
 

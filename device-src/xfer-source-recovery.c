@@ -57,6 +57,7 @@ typedef struct XferSourceRecovery {
 
     /* this mutex in this condition variable governs all variables below */
     GCond  *start_part_cond;
+    GMutex start_part_mutex_obj ;
     GMutex *start_part_mutex;
 
     /* is this device currently paused and awaiting a new part? */
@@ -741,7 +742,8 @@ finalize_impl(
 
     g_cond_free(self->start_part_cond);
     g_cond_free(self->abort_cond);
-    g_mutex_free(self->start_part_mutex);
+    g_mutex_clear(self->start_part_mutex);
+    self->start_part_mutex = NULL ;
 }
 
 static void
@@ -753,7 +755,8 @@ instance_init(
     self->paused = TRUE;
     self->start_part_cond = g_cond_new();
     self->abort_cond = g_cond_new();
-    self->start_part_mutex = g_mutex_new();
+    self->start_part_mutex = &self->start_part_mutex_obj ;
+    g_mutex_init(self->start_part_mutex) ;
     crc32_init(&elt->crc);
 }
 

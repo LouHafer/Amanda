@@ -52,6 +52,7 @@ typedef struct XferSourceHolding {
 
     /* this mutex in this condition variable governs all variables below */
     GCond  *start_recovery_cond;
+    GMutex  start_recovery_mutex_obj ;
     GMutex *start_recovery_mutex;
 
     int fd;
@@ -64,6 +65,7 @@ typedef struct XferSourceHolding {
     gboolean paused;
 
     GThread *holding_thread;
+    GMutex      state_mutex_obj ;
     GMutex     *state_mutex;
     GCond      *state_cond;
 
@@ -666,7 +668,8 @@ instance_init(
 {
     XferSourceHolding *self = XFER_SOURCE_HOLDING(elt);
 
-    self->state_mutex = g_mutex_new();
+    self->state_mutex = &self->state_mutex_obj ;
+    g_mutex_init(self->state_mutex) ;
     self->state_cond = g_cond_new();
 
     elt->can_generate_eof = TRUE;
@@ -676,7 +679,8 @@ instance_init(
     self->offset_file = -1;
     self->fsize = -1;
     self->start_recovery_cond = g_cond_new();
-    self->start_recovery_mutex = g_mutex_new();
+    self->start_recovery_mutex = &self->start_recovery_mutex_obj ;
+    g_mutex_init(self->start_recovery_mutex) ;
     crc32_init(&elt->crc);
 }
 
@@ -687,7 +691,8 @@ finalize_impl(
     XferSourceHolding *self = XFER_SOURCE_HOLDING(obj_self);
 
     g_mutex_lock(self->start_recovery_mutex);
-    g_mutex_free(self->state_mutex);
+    g_mutex_clear(self->state_mutex);
+    self->state_mutex = NULL ;
     g_cond_free(self->state_cond);
 
     if (self->first_filename)
@@ -697,7 +702,8 @@ finalize_impl(
 
     g_cond_free(self->start_recovery_cond);
     g_mutex_unlock(self->start_recovery_mutex);
-    g_mutex_free(self->start_recovery_mutex);
+    g_mutex_clear(self->start_recovery_mutex);
+    self->start_recovery_mutex = NULL ;
     if (self->fd != -1)
 	close(self->fd); /* ignore error; we were probably already cancelled */
 

@@ -302,7 +302,7 @@ static void device_finalize(GObject *obj_self) {
     amfree(self->volume_time);
     amfree(self->volume_header);
     if (self->device_mutex) {
-	g_mutex_free(self->device_mutex);
+	g_mutex_clear(self->device_mutex);
 	self->device_mutex = NULL;
     }
     amfree(selfp->errmsg);
@@ -569,7 +569,8 @@ device_open (char * device_name)
     device = factory(device_name, device_type, device_node);
     g_assert(device != NULL); /* factories must always return a device */
 
-    device->device_mutex = g_mutex_new();
+    device->device_mutex = &device->device_mutex_obj ;
+    g_mutex_init(device->device_mutex) ;
     amfree(device_type);
     amfree(device_node);
 

@@ -155,7 +155,7 @@ xfer_source_directtcp_connect(DirectTCPAddr *addrs)
     g_assert(addrs != NULL);
 
     for (i = 0; SU_GET_FAMILY(&addrs[i]) != 0; i++);
-    self->addrs = g_memdup(addrs, (i+1) * sizeof(*addrs));
+    self->addrs = g_memdup2(addrs, (i+1) * sizeof(*addrs));
 
     return elt;
 }

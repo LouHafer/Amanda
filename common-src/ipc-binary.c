@@ -255,7 +255,7 @@ ipc_binary_add_arg(
     }
 
     if (!take_memory) {
-	data = g_memdup(data, size);
+	data = g_memdup2(data, size);
     }
 
     msg->args[arg_id].len = size;
@@ -455,7 +455,7 @@ ipc_binary_poll_message(
 	    msg->args[arg_id].data = (gpointer)data;
 	    msg->args[arg_id].len = arglen;
 	} else {
-	    msg->args[arg_id].data = g_memdup(p, arglen);
+	    msg->args[arg_id].data = g_memdup2(p, arglen);
 	    msg->args[arg_id].len = arglen;
 	}
 

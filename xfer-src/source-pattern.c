@@ -230,7 +230,7 @@ XferElement * xfer_source_pattern(guint64 length, void * pattern,
 
     xsp->length = length;
     xsp->limited_length = (length > 0);
-    xsp->pattern = g_memdup(pattern, pattern_length);
+    xsp->pattern = g_memdup2(pattern, pattern_length);
     xsp->pattern_buffer_length = pattern_length;
     xsp->current_offset = 0;
 

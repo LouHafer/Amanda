@@ -314,7 +314,10 @@ stream_recvpkt_cancel(
 /*
  * Write a chunk of data to a stream.  Blocks until completion.
  */
-GMutex *stream_write_mutex = NULL;
+
+static GMutex stream_write_mutex_obj ;
+static GMutex *stream_write_mutex = 0 ;
+
 int
 tcpm_stream_write(
     void *	s,
@@ -327,8 +330,9 @@ tcpm_stream_write(
     assert(rs->rc != NULL);
 
     if (!stream_write_mutex) {
-	stream_write_mutex = g_mutex_new();
+      stream_write_mutex = &stream_write_mutex_obj ;
     }
+
     g_mutex_lock(stream_write_mutex);
     auth_debug(6, _("sec: stream_write: writing %zu bytes to %s:%d %d\n"),
 		   size, rs->rc->hostname, rs->handle,

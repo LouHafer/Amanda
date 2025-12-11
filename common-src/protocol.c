@@ -126,7 +126,8 @@ typedef struct proto {
  */
 static time_t proto_init_time;
 static int nb_thread = 0;
-static GMutex *protocol_mutex;
+static GMutex protocol_mutex_obj ;
+static GMutex *protocol_mutex = 0 ;
 
 /* local functions */
 
@@ -161,7 +162,7 @@ protocol_init(void)
 {
 
     proto_init_time = time(NULL);
-    protocol_mutex = g_mutex_new();
+    protocol_mutex = &protocol_mutex_obj ;
 }
 
 /*

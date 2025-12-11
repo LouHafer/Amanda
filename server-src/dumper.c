@@ -82,9 +82,10 @@ struct databuf {
     uint64_t    shm_readx;
     crc_t      *crc;
 };
-pid_t statepid = -1;
 
-struct databuf *g_databuf = NULL;
+static pid_t statepid = -1;
+
+static struct databuf *g_databuf = NULL;
 
 typedef struct filter_s {
     int             fd;
@@ -103,21 +104,21 @@ static off_t dumpbytes;
 static off_t dumpsize, headersize, origsize;
 
 static comp_t srvcompress = COMP_NONE;
-char *srvcompprog = NULL;
-char *clntcompprog = NULL;
+static char *srvcompprog = NULL;
+static char *clntcompprog = NULL;
 
 static encrypt_t srvencrypt = ENCRYPT_NONE;
-char *srv_encrypt = NULL;
-char *clnt_encrypt = NULL;
-char *srv_decrypt_opt = NULL;
-char *clnt_decrypt_opt = NULL;
+static char *srv_encrypt = NULL;
+static char *clnt_encrypt = NULL;
+static char *srv_decrypt_opt = NULL;
+static char *clnt_decrypt_opt = NULL;
 static kencrypt_type dumper_kencrypt;
 
 static FILE *errf = NULL;
 static char *src_ip = NULL;
 static char *maxdumps = NULL;
 static char *hostname = NULL;
-am_feature_t *their_features = NULL;
+static am_feature_t *their_features = NULL;
 static char *diskname = NULL;
 static char *qdiskname = NULL, *b64disk;
 static char *device = NULL, *b64device;
@@ -161,7 +162,10 @@ static int   retry_delay;
 static int   retry_level;
 static char *retry_message = NULL;
 static GThread *shm_thread = NULL;
-static GMutex  *shm_thread_mutex = NULL;
+
+static GMutex shm_thread_mutex_obj ;
+static GMutex *shm_thread_mutex = NULL ;
+
 static GCond   *shm_thread_cond = NULL;
 static shm_ring_t *shm_ring_consumer = NULL;
 static shm_ring_t *shm_ring_direct = NULL;
@@ -1645,7 +1649,7 @@ do_dump(
 		// shm_ring direct
 		db->shm_ring_direct = shm_ring_direct;
 		shm_ring_direct = NULL;
-		shm_thread_mutex = g_mutex_new();
+		shm_thread_mutex = &shm_thread_mutex_obj ;
 		shm_thread_cond  = g_cond_new();
 		shm_thread =
 		    g_thread_new("shm_rg_dir_thr",handle_shm_ring_direct,
@@ -1663,7 +1667,8 @@ do_dump(
 #ifdef FAILURE_CODE
 		disable_network_shm < 1 &&
 #endif
-		am_has_feature(their_features, fe_sendbackup_req_options_data_shm_control_name)) {
+		am_has_feature(their_features,
+			fe_sendbackup_req_options_data_shm_control_name)) {
 		// ring to fd (server filter)
 		db->shm_ring_consumer = shm_ring_consumer;
 		db->crc = &crc_data_in;
@@ -1671,7 +1676,7 @@ do_dump(
 		shm_ring_consumer_set_size(db->shm_ring_consumer,
 					   NETWORK_BLOCK_BYTES*4,
 					   NETWORK_BLOCK_BYTES);
-		shm_thread_mutex = g_mutex_new();
+		shm_thread_mutex = &shm_thread_mutex_obj ;
 		shm_thread_cond  = g_cond_new();
 		shm_thread =
 		    g_thread_new("shm_rg_fd_thr",handle_shm_ring_to_fd_thread,
@@ -1718,7 +1723,6 @@ do_dump(
 	g_thread_join(shm_thread);
 	shm_thread = NULL;
 
-	g_mutex_free(shm_thread_mutex);
 	shm_thread_mutex = NULL;
 	g_cond_free(shm_thread_cond);
 	shm_thread_cond  = NULL;

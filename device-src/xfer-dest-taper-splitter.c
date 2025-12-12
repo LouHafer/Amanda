@@ -1156,14 +1156,6 @@ finalize_impl(
     self->state_mutex = NULL ;
     g_cond_free(self->state_cond);
 
-/*
-    if (self->mem_ring) {
-	g_mutex_free(self->mem_ring->mutex);
-	g_cond_free(self->mem_ring->add_cond);
-	g_cond_free(self->mem_ring->free_cond);
-    }
-*/
-
     if (self->mem_ring) {
       close_mem_ring(self->mem_ring) ;
       self->mem_ring = NULL ;

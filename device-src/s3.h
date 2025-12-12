@@ -763,6 +763,7 @@ typedef struct {
     guint buffer_pos;
     guint max_buffer_size;
     gboolean end_of_buffer;
+    GMutex    mutex_obj ;
     GMutex   *mutex;
     GCond    *cond;
 } CurlBuffer;

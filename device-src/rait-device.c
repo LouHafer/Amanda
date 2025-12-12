@@ -126,6 +126,7 @@ typedef struct ThreadInfo {
     GThread *thread;
 
     /* struct fields below are protected by this mutex and condition variable */
+    GMutex  mutex_obj ;
     GMutex *mutex;
     GCond *cond;
 
@@ -282,8 +283,10 @@ rait_device_finalize(GObject *obj_self)
 		inf->thread = NULL ;
 	    }
 
-	    if (inf->mutex)
-		g_mutex_free(inf->mutex);
+	    if (inf->mutex) {
+		g_mutex_clear(inf->mutex) ;
+		inf->mutex = NULL ;
+	    }
 	    if (inf->cond)
 		g_cond_free(inf->cond);
 	}
@@ -458,7 +461,8 @@ static void do_thread_pool_op(RaitDevice *self, GFunc func, GPtrArray * ops) {
     for (i = 0; i < ops->len; i++) {
 	ThreadInfo *inf = &g_array_index(PRIVATE(self)->threads, ThreadInfo, i);
 	if (!inf->thread) {
-	    inf->mutex = g_mutex_new();
+	    inf->mutex = &inf->mutex_obj ;
+	    g_mutex_init(inf->mutex) ;
 	    inf->cond = g_cond_new();
 	    inf->private = PRIVATE(self);
 	    inf->thread =

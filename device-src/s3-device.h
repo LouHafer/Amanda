@@ -67,6 +67,7 @@ struct _S3_by_thread {
     guint64		 range_max;
     DeviceStatusFlags    errflags;	/* device_status */
     char                *errmsg;	/* device error message */
+    GMutex		 now_mutex_obj ;
     GMutex		*now_mutex;
     guint64		 dlnow, ulnow;
     time_t		 timeout;
@@ -153,6 +154,7 @@ struct _S3Device {
     GThreadPool *thread_pool_write;
     GThreadPool *thread_pool_read;
     GCond       *thread_idle_cond;
+    GMutex       thread_idle_mutex_obj ;
     GMutex      *thread_idle_mutex;
     gint64	 last_byte_read;
     gint64	 next_block_to_read;

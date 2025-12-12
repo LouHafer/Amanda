@@ -66,7 +66,9 @@ init_openssl(void)
 
     SSL_library_init();
     for (i=0; i<CRYPTO_num_locks(); i++) {
-	openssl_mutex_array[i] = g_mutex_new();
+        GMutex *new_mutex = g_new0(GMutex,1) ;
+	g_mutex_init(new_mutex) ;
+	openssl_mutex_array[i] = new_mutex ;
     }
     CRYPTO_set_locking_callback(openssl_lock_callback);
 #else
@@ -142,15 +144,14 @@ glib_init(void) {
     }
 #endif
 
-    /* Initialize glib's type system.  On glib >= 2.24, this will initialize
-     * threads, so it must be done after curl is initialized. */
-    g_type_init();
-
-    /* Initialize global mutex */
-    file_mutex = g_mutex_new();
-    shm_ring_mutex = g_mutex_new();
-    priv_mutex = g_mutex_new();
-    security_mutex = g_mutex_new();
+    file_mutex = g_new0(GMutex,1) ;
+    g_mutex_init(file_mutex) ;
+    shm_ring_mutex = g_new0(GMutex,1) ;
+    g_mutex_init(shm_ring_mutex) ;
+    priv_mutex = g_new0(GMutex,1) ;
+    g_mutex_init(priv_mutex) ;
+    security_mutex = g_new0(GMutex,1) ;
+    g_mutex_init(security_mutex) ;
 
     /* initialize ssl */
     init_ssl();

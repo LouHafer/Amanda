@@ -60,18 +60,18 @@ AC_DEFUN([AMANDA_GET_SVN_INFO],
 	url=`$GREP URL: conftemp.svn|cut -d: -f 2-|cut -c2-`
 	( echo '#define BUILT_REV "'$SVN_REV'"'
 	  echo '#define BUILT_BRANCH "'$SVN_BRANCH'"'
-	) > common-src/svn-info.h
+	) > $srcdir/common-src/svn-info.h
 	BUILT_REV="$SVN_REV"
 	BUILT_BRANCH="$SVN_BRANCH"
 
 	AC_MSG_RESULT([updated])
     else
 	# Makefiles will be upset if the file doesn't exist, so double-check
-	if test -f common-src/svn-info.h; then
+	if test -f $srcdir/common-src/svn-info.h; then
 	    : # all good
 	    AC_MSG_RESULT([not changed])
 	else
-	    echo '/* no information available */' > common-src/svn-info.h
+	    echo '/* no information available */' > $srcdir/common-src/svn-info.h
 	    AC_MSG_RESULT([not available])
 	fi
 	BUILT_REV=""

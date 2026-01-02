@@ -288,7 +288,7 @@ is_deeply (Installcheck::Rest::remove_source_line($reply),
 			'HOLDINGDISK' => [
 				'hd1'
 			],
-			'REST-API-PORT' => 0,
+			'REST-API-PORT' => 5000,
 			'MAXDUMPSIZE' => -1,
 			'DEBUG-TAPER' => 0,
 			'REPORT-FORMAT' => [],

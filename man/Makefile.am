@@ -168,7 +168,9 @@ ALL_MAN_HTMLS = $(ALL_MAN_PAGES:%=%.html)
 
 # toplevel rule to build HTML manpages and tar them up
 html: amanda.css index.php $(ALL_MAN_HTMLS)
-	tar -zcf html.tar.gz $(ALL_MAN_HTMLS) amanda.css index.php
+	tar -zcf html.tar.gz $(ALL_MAN_HTMLS) \
+	  $(top_srcdir)/man/amanda.css \
+	  $(top_srcdir)/man/index.php
 
 # double-check that we don't ship dummy manpages
 dist-hook:

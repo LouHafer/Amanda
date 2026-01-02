@@ -28,9 +28,11 @@ use File::Temp;
 use Getopt::Long;
 
 my $opt_homeurl;
+my $srcdir = '.' ;
 Getopt::Long::Configure(qw(bundling));
 GetOptions(
     'homeurl=s' => \$opt_homeurl,
+    'srcdir=s' => \$srcdir,
 );
 
 my ($targetdir, @sources) = @ARGV;
@@ -96,7 +98,9 @@ for $pm (@sources) {
     mkpath("$targetdir/$dir");
 
     # slurp the source
-    open ($fh, "<", $pm) or die("Error opening $pm: $!");
+    open ($fh, "<", "$pm") or
+      open ($fh, "<", "$srcdir/$pm") or
+      die("Error opening $pm: $!");
     my $pod = do { local $/; <$fh> };
     close ($fh);
 

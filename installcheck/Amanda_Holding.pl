@@ -164,7 +164,7 @@ is_deeply([ Amanda::Holding::get_all_datestamps() ],
 	  "get_all_datestamps");
 
 is_deeply([ sort(+Amanda::Holding::get_files_for_flush(0, "023985")) ],
-	  [ sort() ],
+	  [ sort(()) ],
 	  "get_files_for_flush with no matching datestamps returns no files");
 is_deeply([ Amanda::Holding::get_files_for_flush(0, "20070306123456") ],
 	  [ sort(

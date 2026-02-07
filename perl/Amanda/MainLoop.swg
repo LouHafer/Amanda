@@ -35,14 +35,15 @@
 
 use POSIX;
 use Carp;
+use Amanda::Debug qw( debug ) ;
 
 ## basic functions
 
 BEGIN {
-    my $have_sub_name = eval "use Sub::Name; 1";
-    if (!$have_sub_name) {
+    my $have_set_sub_name = eval "use Sub::Util qw(set_subname subname) ; 1";
+    if (!$have_set_sub_name) {
 	eval <<'EOF'
-	    sub subname {
+	    sub set_subname {
 		my ($name, $sub) = @_;
 		$sub;
 	    }
@@ -50,47 +51,127 @@ EOF
     }
 }
 
-# glib's g_is_main_loop_running() seems inaccurate, so we just
-# track that information locally..
-my $mainloop_running = 0;
-sub run {
-    $mainloop_running = 1;
-    run_c();
-    $mainloop_running = 0;
-}
-push @EXPORT_OK, "run";
+my $traceLvl = 0 ;
 
-sub is_running {
-    return $mainloop_running;
-}
-push @EXPORT_OK, "is_running";
+# Utility to enable detailed tracing.
+# $oldLvl = set_traceLvl($newLvl) ;
 
-# quit is a direct call to C
+sub set_traceLvl
+{ my $newLvl = $_[0] ;
+  my $oldLvl = $traceLvl ;
+  $traceLvl = $newLvl ;
+  debug("MainLoop::set_traceLvl: trace level was $oldLvl, now $newLvl") ;
+  return ($oldLvl) ; }
+
+push @EXPORT_OK, 'set_traceLvl' ;
+
+# Callbacks waiting to be queued for the next MainLoop iteration
+
+my @waiting_to_call_later = () ;
+
+# For debugging, give each invocation of the callback in call_later a unique
+# ID, and keep track of how many are extant.
+
+my $cb_id = 0 ;
+my $cb_extant = 0 ;
+
+# glib's g_is_main_loop_running() seems inaccurate, so we just track that
+# information locally.
+
+my $mainloop_running = 0 ;
+sub run
+{ $mainloop_running = 1 ;
+  run_c() ;
+  $mainloop_running = 0 ; }
+
+push @EXPORT_OK, 'run' ;
+
+sub is_running { return $mainloop_running; }
+
+push @EXPORT_OK, 'is_running' ;
+
+# Handy to have a quit method for debug.
+
+sub quit
+{ if ($traceLvl >= 1)
+  { debug("MainLoop::quit: stopping main loop with $cb_extant ".
+  	  "orphaned callbacks.") ; }
+  quit_c() ;
+  $cb_id = 0 ;
+  $cb_extant = 0 ; }
+
 push @EXPORT_OK, "quit";
 
 ## utility functions
 
-my @waiting_to_call_later;
-sub call_later {
-    my ($sub, @args) = @_;
+# The base function for queuing up callbacks for the next MainLoop iteration.
+# void call_later(\&sub,@args)
 
-    confess "undefined sub" unless ($sub);
+# The notion here is that we're accumulating a collection of callbacks that
+# should be invoked on the next iteration of the main loop. At the first call,
+# @waiting_to_call_later will be empty and we'll create an event callback,
+# do_next_iter, and attach it to an event source. Then sub & args are added
+# to the collection.  Subsequent calls will simply add to the collection in
+# @waiting_to_call_later.  When do_next_iter finally executes, it'll drain
+# the accumulated collection from waiting_to_call_later into snapshot and
+# proceed to execute all of them.
 
-    # add the callback if nothing is waiting right now
-    if (!@waiting_to_call_later) {
-        timeout_source(0)->set_callback(sub {
-            my ($src) = @_;
-            $src->remove();
+sub call_later
+{ 
+  my ($sub, @args) = @_;
 
-            while (@waiting_to_call_later) {
-                my ($sub, @args) = @{shift @waiting_to_call_later};
-                $sub->(@args) if $sub;
-            }
-        });
-    }
+  confess "undefined sub" unless ($sub) ;
+  confess "sub is not a code reference" unless ref($sub) eq 'CODE' ;
 
-    push @waiting_to_call_later, [ $sub, @args ];
+# Construct an event callback if nothing is yet waiting and queue it up on a
+# timeout(0) event source for execution.
+
+  if (!@waiting_to_call_later)
+  { $cb_extant++ ;
+    $cb_id++ ;
+    if ($traceLvl >= 4)
+    { debug("MainLoop::call_later: creating do_next_iter callback $cb_id") ; }
+    my $closure_id = $cb_id ;
+    
+    $do_next_iter = sub
+      { my ($src) = @_ ;
+	$src->remove() ;
+	if ($traceLvl >= 4)
+	{ debug("MainLoop::call_later: starting do_next_iter ".
+		" callback $closure_id") ; }
+
+	if (1)
+	{ my @snapshot = @waiting_to_call_later ;
+	  @waiting_to_call_later = () ;
+	  while (@snapshot)
+	  { my ($sub, @args) = @{shift @snapshot} ;
+	    if ($traceLvl >= 7)
+	    { my $nm = subname($sub) ;
+	      debug("      do_next_iter $closure_id invoking $nm ($sub)") ; }
+	    $sub->(@args) if $sub ; } }
+	else
+	{ while (@waiting_to_call_later)
+	  { my ($sub,@args) = @{shift @waiting_to_call_later} ;
+	    if ($traceLvl >= 7)
+	    { my $nm = subname($sub) ;
+	      debug("      do_next_iter $closure_id invoking $nm ($sub)") ; }
+	    $sub->(@args) if $sub ; } }
+	if ($traceLvl >= 4)
+	{ debug("MainLoop::call_later: finished do_next_iter ".
+		"callback $closure_id") ; }
+	if ($cb_extant > 0) { $cb_extant-- ; }
+      } ;
+
+    timeout_source(0)->set_callback($do_next_iter) ; }
+
+# Add the callback subroutine & arguments to the collection.
+
+  if ($traceLvl > 4)
+  { my $nm = subname($sub) ;
+    debug("MainLoop::call_later: adding $nm ($sub) to do_next_iter $cb_id") ; }
+  push @waiting_to_call_later, [ $sub, @args ] ;
 }
+
 push @EXPORT_OK, "call_later";
 
 sub make_cb {
@@ -99,7 +180,7 @@ sub make_cb {
     if ($sub) {
 	my ($pkg, $filename, $line) = caller;
 	my $newname = sprintf('$%s::%s@l%s', $pkg, $name, $line);
-	$sub = subname($newname => $sub);
+	$sub = Sub::Util::set_subname($newname => $sub);
     } else {
 	$sub = $name; # no name => sub is actually in first parameter
     }
@@ -256,7 +337,7 @@ sub synchronized {
 }
 push @EXPORT_OK, "synchronized";
 
-{   # privat variables to track the "current" step definition
+{   # private variables to track the "current" step definition
     my $current_steps;
     my $immediate;
     my $first_step;
@@ -302,21 +383,29 @@ push @EXPORT_OK, "synchronized";
 
 	croak "expected a sub at key $name" unless ref($cb) eq 'CODE';
 
-	# make the sub delayed
+	# generate an informative name for the callback
+
+	my ($pkg, $filename, $line) = caller;
+	my $newname = sprintf('$%s::%s@l%s', $pkg, $name, $line);
+	$cb = set_subname($newname => $cb);
+
+
+	# make the sub delayed unless immediate is requested
+
 	unless ($step_immediate) {
 	    my $orig_cb = $cb;
 	    $cb = sub { Amanda::MainLoop::call_later($orig_cb, @_); }
 	}
 
-	# patch up the callback
-	my ($pkg, $filename, $line) = caller;
-	my $newname = sprintf('$%s::%s@l%s', $pkg, $name, $line);
-	$cb = subname($newname => $cb);
-
 	# store the step for later
+
 	$current_steps->{$name} = $cb;
 
 	# and invoke it, if it's the first step given
+	# 260202 I'm not at all convinced that this is correct. Seems to me
+	# the two legs are equivalent, except that @_ is stripped in the
+	# non-immediate case.
+
 	if ($first_step) {
 	    if ($step_immediate) {
 		call_later($cb);
@@ -339,7 +428,7 @@ void run_until_empty_c(void) {
     event_loop(0);
 }
 
-void quit(void) {
+void quit_c(void) {
     event_loop_quit();
 }
 %}

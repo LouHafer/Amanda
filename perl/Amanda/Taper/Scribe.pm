@@ -1252,16 +1252,20 @@ sub _release_reservation {
 	# if we've already written a volume, log it
 	if ($self->{'device'} and defined $self->{'device'}->volume_label) {
 	    $do_eject = 1 if $self->{'taperscan'}->{'storage'}->{'eject_volume'};
-	    $label = $self->{'device'}->volume_label();
+	    $label = $self->{'device'}->volume_label;
 	    $fm = $self->{'device'}->file();
 	    $kb = $self->{'device_size'} / 1024;
 	    my $tl = $self->{'taperscan'}->{'tapelist'};
 	    my $tle = $tl->lookup_tapelabel($label);
 
-	    # log a message for amreport
-	    $self->{'feedback'}->scribe_notif_log_info(
-	        message => "tape $label Barcode $tle->{'barcode'} kb $kb fm $fm [OK]");
-	    if ($self->{'taperscan'}->{'storage'}->{'erase_on_failure'} && $self->{'tape_labelled'} && !$self->{'tape_good'}) {
+	    # Log a message for amreport. Barcode is optional in a tle.
+	    my $strtmp =
+	        "tape $label ".
+		((defined $tle->{'barcode'})?"$tle->{'barcode'} ":'').
+		"kb $kb fm $fm [OK]" ;
+	    $self->{'feedback'}->scribe_notif_log_info(message => $strtmp) ;
+	    if ($self->{'taperscan'}->{'storage'}->{'erase_on_failure'} &&
+	        $self->{'tape_labelled'} && !$self->{'tape_good'}) {
 		# rewrite the tapelist
 		$tl->reload(1);
 		$label = $self->{'device'}->volume_label;
@@ -1983,7 +1987,18 @@ sub get_volume {
 
     $self->{'volume_cb'} = $params{'volume_cb'};
 
-    # kick off the relevant processes, if they're not already running
+    # Kick off the relevant processes, if they're not already running. Order
+    # is important here! Check if we need to scan before checking for
+    # permission. Otherwise, if we have a reservation already, _start_request
+    # will give it away to the Scribe down in _maybe_callback and reset
+    # DevHandling to a state that will permit a new scan.
+
+    # if we don't have a reservation, and there's no scan already running to
+    # obtain one, fire up a new scan to get a new reservation.
+
+    if (!$self->{'reservation'} && !$self->{'scan_running'})
+    { $self->_start_scanning() ; }
+
     $self->_start_request();
 
     $self->_maybe_callback();

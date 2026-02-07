@@ -269,9 +269,7 @@ sub new {
 	$params{'changer'} = $params{'storage'}->{'chg'}
 			unless exists $params{'changer'};
     }
-    if ($params{'chg'}) {
-	my $chg = $params{'changer'};
-    }
+
     $params{'retention_tapes'} = getconf($CNF_TAPECYCLE)
 	unless exists $params{'retention_tapes'};
     $params{'retention_days'} = 0

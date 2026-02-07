@@ -140,8 +140,7 @@ sub stage_1 {
 
     step setup => sub {
 	debug("Amanda::Taper::Scan::traditional stage 1: search for oldest reusable volume");
-	$oldest_reusable = $self->oldest_reusable_volume(
-	);
+	$oldest_reusable = $self->oldest_reusable_volume();
 
 	if (!defined $oldest_reusable) {
 	    debug("Amanda::Taper::Scan::traditional no oldest reusable volume");

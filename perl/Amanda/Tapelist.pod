@@ -31,7 +31,7 @@ Amanda::Tapelist - manipulate the Amanda tapelist
     use Amanda::Tapelist;
 
     # to get a read only copy of the tapelist file:
-    my $tl = Amanda::Tapelist->new("/path/to/tapefile");
+    my ($tl,$msg) = Amanda::Tapelist->new("/path/to/tapefile");
 
     # to read/update/write the tapelist file
     # read and take lock
@@ -44,7 +44,7 @@ Amanda::Tapelist - manipulate the Amanda tapelist
 
     # If you already have a read only copy and want to modify it
     # take a read only copy
-    my $tl = Amanda::Tapelist->new("/path/to/tapefile");
+    my ($tl,$msg) = Amanda::Tapelist->new("/path/to/tapefile");
     # reload and take lock
     $tl->reload(1);
     # modify the memory copy

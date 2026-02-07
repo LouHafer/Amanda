@@ -375,6 +375,8 @@ sub _xmsg_part_done {
     my ($src, $msg, $xfer) = @_;
     my $xfer_state = $self->{'xfer_state'};
 
+    $xfer_state->{'writing_part'} = 0 ;
+
     my $next_label = $xfer_state->{'next_part'}->{'label'};
     my $next_filenum = $xfer_state->{'next_part'}->{'filenum'};
 
@@ -445,22 +447,34 @@ sub _maybe_start_part {
 	cb_ref => \$finished_cb;
 
     step check_ready => sub {
-	# if we're still working on a part, do nothing
-	return $finished_cb->()
-	    if $xfer_state->{'writing_part'};
 
-	# if we have an xfer source already, and it's not ready, then don't start
-	# the part.  This happens when start_recovery is called before XMSG_READY.
-	return $finished_cb->()
-	    if $xfer_state->{'xfer_src'} and not $xfer_state->{'xfer_src_ready'};
+	# If we're still working on a part, do nothing.
 
-	# if we have an xfer source already, but the recovery hasn't started, then
-	# don't start the part.  This happens when XMSG_READY comes before
+	return $finished_cb->() if $xfer_state->{'writing_part'} ;
+
+	# If we have an xfer source already, and it's not ready, then don't
+	# start the part.  This happens when start_recovery is called before
+	# XMSG_READY.
+
+	return $finished_cb->() if $xfer_state->{'xfer_src'} and
+				   not $xfer_state->{'xfer_src_ready'} ;
+
+	# If we have an xfer source already, but the recovery hasn't started,
+	# then don't start the part.  This happens when XMSG_READY comes before
 	# start_recovery.
-	return $finished_cb->()
-	    if $xfer_state->{'xfer_src'} and not $xfer_state->{'recovery_cb'};
 
-	return $steps->{'check_next'}->();
+	return $finished_cb->() if $xfer_state->{'xfer_src'} and
+				   not $xfer_state->{'recovery_cb'};
+
+	# It can happen that start_recovery and XMSG_READY occur in the same
+        # MainLoop iteration, in which case we've queued up two callbacks for
+        # check_ready. Setting 'writing_part' to 1 will insure only one of
+        # them proceeds. Do this only after we've acquired the source.
+
+        if (defined $xfer_state->{'xfer_src'})
+        { $xfer_state->{'writing_part'} = 1 ; }
+
+	return $steps->{'check_next'}->() ;
     };
 
     step check_next => sub {

@@ -681,8 +681,8 @@ sub {
 	    } else {
 		print STDERR "$_[0]\n";
 	    }
-	    $got_success++ if $_[0]->{'severity'} eq $Amanda::Message::SUCCESS;
-	    $got_error++ if $_[0]->{'severity'} eq $Amanda::Message::ERROR;
+	    $got_success++ if $_[0]->{'severity'} eq $SUCCESS;
+	    $got_error++ if $_[0]->{'severity'} eq $ERROR;
 	},
 	finished_cb => sub {
 	    my ($err) = @_;
@@ -794,7 +794,7 @@ Amanda::Util::finish_setup($RUNNING_AS_DUMPUSER);
 my $tlf = Amanda::Config::config_dir_relative(getconf($CNF_TAPELIST));
 ($tl, my $message) = Amanda::Tapelist->new($tlf);
 if (defined $message) {
-    if ($message->{'severity'} >= $Amanda::Message::CRITICAL) {
+    if ($message->{'severity'} >= $CRITICAL) {
 	die("error loading tapelist: $message");
     }
     print STDERR "ERROR: $message\n";

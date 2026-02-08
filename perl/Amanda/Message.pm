@@ -37,7 +37,7 @@ use overload
 
 Amanda::Message - Amanda object use to return a message
 
-Most API use or should be converted to use it.
+Most APIs use it or should be converted to use it.
 
 =head1 SYNOPSIS
 
@@ -53,11 +53,11 @@ Most API use or should be converted to use it.
 
 =head1 Message Objects
 
-'source_filename' and 'source_line' are use for debuging to find where the
+C<source_filename> and C<source_line> are used for debugging to find where the
 message was generated.
 
-The 'severity' of the message, the default is CRITICAL, it must be one of
-these predefined constants:
+The 'severity' of the message; it must be one of these predefined constants:
+
   CRITICAL
   ERROR
   WARNING
@@ -65,68 +65,74 @@ these predefined constants:
   INFO
   SUCCESS
 
-The 'code' must be unique, it identify the message (0 to 3 are used for message
-not handled by Amanda::Message):
-       0  GOOD message
-       1  ERROR with a message
-       2  ERROR without a message
-       3  Amanda::Changer::Error   #You should never create it
- 1000000  Amanda::Label message
- 1100000  Amanda::Changer::Message
- 1200000  Amanda::Recovery::Message
- 1300000  Amanda::Curinfo::Message
- 1400000  Amanda::Disklist::Message
- 1500000  Amanda::Config::Message
- 1600000  Amanda::Tapelist::Message
- 1700000  Amanda::Device::Message
- 1800000  Amanda::Status::Message
- 1900000  Amanda::Report::Message
- 2000000  Amanda::Amdump::Message
- 2100000  Amanda::Cmdfile::Message
- 2200000  Amanda::Amflush::Message
- 2400000  Amanda::Index::Message
- 2500000  Amanda::Amvault::Message
- 2600000  Amanda::DB::Message
- 2700000  Amanda::CheckDump::Message
- 2800000  amcheck
- 2900000  client service - senddiscover, restore, ...
- 3000000  Amanda::Amvmware::Message
- 3100000  Amanda::Service::Message
- 3101000    Amanda::Service::Restore::Message
- 3200000  Amanda::Appliance
- 3300000  Amanda::FetchDump::Message
- 3400000  Amanda::Cleanup::Message
- 3500000  Amanda::Process::Message
- 3600000  selfcheck
- 3700000  applications
-  3700000  amgtar
-  3701000  amstar
-  3702000  ambsdtar
- 3800000  Amanda::Extensions::Message
-  3801000  Amanda::Extensions::Rest::Application::Amvmware
- 3900000  planner
- 4000000  sendsize
- 4100000  dumper
- 4200000  sendbackup
- 4300000  Amanda::Chunker::Message
- 4400000  Amanda::Taper::Message
- 4500000  driver
- 4600000  client-util
- 4700000  scripts
-  4700000  script-email
-  4701000  amlog-script
-  4702000  amzfs-snapshot
- 4800000  Amanda::Extract::Message
- 4900000  Amanda::Restore::Message
- 5000000  ambackupd
+The default is C<CRITICAL>. The constants can be imported with the tag
+C<:security>.
+
+The C<code> must be unique; it identifies the message.
+Codes 0 to 3 are used for message not handled by Amanda::Message:
+
+	 0  GOOD message
+	 1  ERROR with a message
+	 2  ERROR without a message
+	 3  Amanda::Changer::Error   #You should never create it
+   1000000  Amanda::Label message
+   1100000  Amanda::Changer::Message
+   1200000  Amanda::Recovery::Message
+   1300000  Amanda::Curinfo::Message
+   1400000  Amanda::Disklist::Message
+   1500000  Amanda::Config::Message
+   1600000  Amanda::Tapelist::Message
+   1700000  Amanda::Device::Message
+   1800000  Amanda::Status::Message
+   1900000  Amanda::Report::Message
+   2000000  Amanda::Amdump::Message
+   2100000  Amanda::Cmdfile::Message
+   2200000  Amanda::Amflush::Message
+   2400000  Amanda::Index::Message
+   2500000  Amanda::Amvault::Message
+   2600000  Amanda::DB::Message
+   2700000  Amanda::CheckDump::Message
+   2800000  amcheck
+   2900000  client service - senddiscover, restore, ...
+   3000000  Amanda::Amvmware::Message
+   3100000  Amanda::Service::Message
+   3101000    Amanda::Service::Restore::Message
+   3200000  Amanda::Appliance
+   3300000  Amanda::FetchDump::Message
+   3400000  Amanda::Cleanup::Message
+   3500000  Amanda::Process::Message
+   3600000  selfcheck
+   3700000  applications
+     3700000  amgtar
+     3701000  amstar
+     3702000  ambsdtar
+   3800000  Amanda::Extensions::Message
+     3801000  Amanda::Extensions::Rest::Application::Amvmware
+   3900000  planner
+   4000000  sendsize
+   4100000  dumper
+   4200000  sendbackup
+   4300000  Amanda::Chunker::Message
+   4400000  Amanda::Taper::Message
+   4500000  driver
+   4600000  client-util
+   4700000  scripts
+     4700000  script-email
+     4701000  amlog-script
+     4702000  amzfs-snapshot
+   4800000  Amanda::Extract::Message
+   4900000  Amanda::Restore::Message
+   5000000  ambackupd
 
 general keys:
+
   code            =>
   source_filename =>
   source_line     =>
   message         => 'default message'  #optional
 
 each code can have it's own set of keys:
+
   filename        =>
   errno           =>
   label           =>
@@ -170,6 +176,15 @@ use Encode;
 use Scalar::Util qw(blessed refaddr readonly);
 
 use Amanda::Debug;
+use parent 'Exporter' ;
+
+# Allow a user to export the severity constants as tag ':severity'.
+
+our %EXPORT_TAGS =(
+    severity =>
+        [ qw( $CRITICAL $ERROR $WARNING $MESSAGE $INFO $SUCCESS ) ]
+  ) ;
+Exporter::export_ok_tags('severity') ;
 
 sub new {
     my $class = shift @_;

@@ -361,13 +361,21 @@ is(run_get('amgetconf', 'TESTCONF', "property:prop2"), "value2",
     "correctly returns property prop2 from the file");
 is(run_get('amgetconf', 'TESTCONF', "property:prop3"), "value3",
     "correctly returns property prop3 from the file");
-is(run_get('amgetconf', 'TESTCONF', "property"), "hidden \"prop1\" \"value1\"\nhidden \"prop2\" \"value2\"\nhidden \"prop3\" \"value3\"",
-    "correctly returns all propertiss from the file");
+
+# There's no guaranteed order for the returned list of properties, so sort
+# before we compare.
+
+my $retVal = run_get('amgetconf', 'TESTCONF', "property") ;
+my @retValArr = split("\n",$retVal) ;
+$retVal = join("\n",sort(@retValArr)) ;
+is($retVal, "hidden \"prop1\" \"value1\"\nhidden \"prop2\" \"value2\"\n".
+	    "hidden \"prop3\" \"value3\"",
+    "correctly returns all properties from the file");
 
 isnt(run_get('amgetconf', '--platform'), "Unknown",
-    "correctly returns then platform");
+    "correctly returns the platform");
 isnt(run_get('amgetconf', '--distro'), "Unknown",
-    "correctly returns then distro");
+    "correctly returns the distro");
 
 $testconf->add_storage("STO", [ 'tpchanger' => '"/dev/nst0"' ]);
 $testconf->add_taperscan("SCAN", [ 'plugin' => '"lexical"' ]);

@@ -340,23 +340,31 @@ sub msg_ABORT {
 	return;
     }
 
+# By the time this callback executes, it may well be that the cleanup code in
+# result_cb has already executed and undef'd the handle and the params we need
+# for log_add. Capture them here in a closure so we can send ABORT_FINISHED
+# and the log message.  The '.""' in quote_string is required for SWIG.
+
+    my $handle_snap = $self->{'handle'} ;
+    my @log_parms_snap = ( quote_string($self->{'hostname'}.""),
+    			   quote_string($self->{'diskname'}.""),
+			   $self->{'datestamp'},
+			   $self->{'level'} ) ;
+
     my $quit_cb = sub {
+	my $closure_handle = $handle_snap ;
+	my @closure_log_parms = @log_parms_snap ;
 	$self->{'proto'}->send(Amanda::Chunker::Protocol::ABORT_FINISHED,
-	    handle => $self->{'handle'});
+	    handle => $closure_handle);
 	my $mesg;
 	if ($self->{'holding_error'}) {
 	    $mesg = "[$self->{'holding_error'}]";
 	} elsif ($params{'message'}) {
 	    $mesg =  "[$params{'message'}]";
 	} else {
-	    $mesg =  "[$self->{'handle'}]";
+	    $mesg =  "[$closure_handle]";
 	}
-	log_add($L_FAIL, sprintf("%s %s %s %s %s",
-	    quote_string($self->{'hostname'}.""), # " is required for SWIG..
-	    quote_string($self->{'diskname'}.""),
-	    $self->{'datestamp'},
-	    $self->{'level'},
-	    $mesg));
+	log_add($L_FAIL,sprintf("%s %s %s %s %s", @closure_log_parms,$mesg)) ;
     };
 
     $self->{'cancelled'} = 1;

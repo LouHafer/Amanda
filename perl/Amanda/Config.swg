@@ -1400,7 +1400,7 @@ fail:
 }
 
 /* typedef and typemap for getconf_byname_strs, which is like getconf_byname, 
- * but converts the result with val_t_dispaly_strs
+ * but converts the result with val_t_display_strs
  */
 %typemap (out) val_t_strs {
     char **it = $1;

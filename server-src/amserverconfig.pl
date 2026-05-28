@@ -148,8 +148,19 @@ sub copy_template_file {
 	&log_and_die ("ERROR: Cannot create $confdir/$config/amanda.conf: $!\n", 1);
     chmod ($amanda_conf_perm, "$confdir/$config/amanda.conf") ||
 	&log_and_die ("ERROR: Cannot set amanda.conf file access permission: $!\n", 1);
+
+# When amanda-harddisk.conf.in is transformed to amanda-harddisk.conf, the
+# substitution for @localstatedir@ ends up as '${prefix}/var', which of course
+# doesn't work. Autoconf is behaving as it should; it expects this expansion
+# to occur in a context where ${prefix} is already defined and will be
+# expanded (see, for example, perl/Amanda/Paths.pm.in vs. Paths.pm). Catch
+# that here and expand with $prefix as defined by Paths.pm. Do this for all
+# templates, just in case someone decides it's a good idea to do something
+# similar in one of the other template files.
+
     while (<CONF>) {
 	$_ =~ s/$def_config/$config/;
+	$_ =~ s/\$\{prefix\}/$prefix/ ;
 	print NEWCONF $_;
     }
     close(CONF);
